@@ -4,7 +4,7 @@ import { login } from '../services/api';
 import { Lock, User, ShieldCheck, BarChart2, AlertCircle } from 'lucide-react';
 
 export default function Login() {
-  const [username, setUsername] = useState('CGAnalyst');
+  const [username, setUsername] = useState('CGManager');
   const [password, setPassword] = useState('123');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +17,7 @@ export default function Login() {
     try {
       const response = await login({ username, password });
       localStorage.setItem('token', response.token);
-      navigate(response.role === 'ADMIN' ? '/admin' : '/analyst');
+      navigate(response.role === 'ADMIN' ? '/admin' : '/manager');
     } catch {
       setError('Invalid credentials or account is disabled.');
     } finally {
@@ -67,7 +67,7 @@ export default function Login() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', marginBottom: '1.25rem' }}>
               {[
                 { label: 'Admin', sub: 'CGAdmin', Icon: ShieldCheck, color: 'var(--indigo)', set: () => { setUsername('CGAdmin'); setPassword('123'); } },
-                { label: 'Analyst', sub: 'CGAnalyst', Icon: BarChart2, color: 'var(--cyan)', set: () => { setUsername('CGAnalyst'); setPassword('123'); } },
+                { label: 'Manager', sub: 'CGManager', Icon: BarChart2, color: 'var(--cyan)', set: () => { setUsername('CGManager'); setPassword('123'); } },
               ].map(({ label, sub, Icon, color, set }) => (
                 <button key={label} type="button" onClick={set} style={{
                   display: 'flex', alignItems: 'center', gap: 9,

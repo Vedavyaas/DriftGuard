@@ -1,0 +1,26 @@
+{
+  "version": "1.0",
+  "project_name": "Phoenix-Core",
+  "description": "Sample configuration for DriftGuard ingestion",
+  "cloud": {
+    "provider": "AWS",
+    "region": "us-east-1",
+    "resources_to_track": [
+      "EC2",
+      "S3",
+      "RDS"
+    ]
+  },
+  "git": {
+    "provider": "GitHub",
+    "repository": "https://github.com/company/phoenix-core",
+    "default_branch": "main"
+  },
+  "drift_tolerances": {
+    "severity": "HIGH",
+    "alerting": {
+      "email": "manager@company.com",
+      "slack_channel": "#alerts-phoenix"
+    }
+  }
+}

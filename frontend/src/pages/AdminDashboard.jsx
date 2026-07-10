@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  getSelfInfo, getAnalystsInfo, createAnalyst,
-  changeAnalystValidity, changeDetails
+  getSelfInfo, getProjectManagersInfo, createProjectManager,
+  changeProjectManagerValidity, changeDetails
 } from '../services/api';
 import {
   ShieldCheck, Users, UserPlus, Settings, LogOut,
@@ -15,8 +15,8 @@ import {
 ───────────────────────────────────────── */
 const NAV = [
   { id: 'overview',       label: 'Overview',        icon: LayoutDashboard },
-  { id: 'create',         label: 'Create Analyst',  icon: UserPlus        },
-  { id: 'analysts',       label: 'Analysts',         icon: Users           },
+  { id: 'create',         label: 'Create Manager',  icon: UserPlus        },
+  { id: 'managers',       label: 'Project Managers', icon: Users           },
   { id: 'profile',        label: 'My Profile',       icon: Settings        },
 ];
 
@@ -79,7 +79,6 @@ function Overview({ self }) {
       {/* Stat grid */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         {[
-          { label: 'User ID',  value: `#${self.id}`,  color: 'var(--text-3)', mono: true },
           { label: 'Username', value: self.username,   color: 'var(--indigo)'             },
           { label: 'Email',    value: self.email,      color: 'var(--cyan)'               },
         ].map(({ label, value, color, mono }) => (
@@ -130,7 +129,7 @@ function Overview({ self }) {
 }
 
 
-function CreateAnalyst() {
+function CreateProjectManager() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -139,19 +138,19 @@ function CreateAnalyst() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createAnalyst(form);
-      setMsg({ ok: true, text: 'Analyst account created successfully.' });
+      await createProjectManager(form);
+      setMsg({ ok: true, text: 'Project Manager account created successfully.' });
       setForm({ username: '', email: '', password: '' });
     } catch {
-      setMsg({ ok: false, text: 'Failed to create analyst. Username or email may already exist.' });
+      setMsg({ ok: false, text: 'Failed to create manager. Username or email may already exist.' });
     } finally { setLoading(false); }
   };
 
   return (
     <div style={{ maxWidth: 480 }}>
       <div style={{ marginBottom: '1.75rem' }}>
-        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Create Analyst</h2>
-        <p style={{ color: 'var(--text-2)', marginTop: 4, fontSize: '0.9rem' }}>Add a new analyst account to the system.</p>
+        <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Create Project Manager</h2>
+        <p style={{ color: 'var(--text-2)', marginTop: 4, fontSize: '0.9rem' }}>Add a new project manager account to the system.</p>
       </div>
 
       <div className="g-card">
@@ -162,7 +161,7 @@ function CreateAnalyst() {
               onChange={e => setForm({ ...form, username: e.target.value })} />
           </Field>
           <Field label="Email">
-            <input className="inp no-icon" type="email" placeholder="analyst@company.com" required value={form.email}
+            <input className="inp no-icon" type="email" placeholder="manager@company.com" required value={form.email}
               onChange={e => setForm({ ...form, email: e.target.value })} />
           </Field>
           <Field label="Password">
@@ -182,32 +181,30 @@ function CreateAnalyst() {
   );
 }
 
-function AnalystList() {
-  const [analysts, setAnalysts] = useState([]);
+function ProjectManagerList() {
+  const [managers, setManagers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [toggling, setToggling] = useState(null);
 
   const fetch = async () => {
     setLoading(true);
-    try { setAnalysts(await getAnalystsInfo()); } catch {}
+    try { setManagers(await getProjectManagersInfo()); } catch {}
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetch(); }, []);
 
   const filtered = useMemo(() =>
-    analysts.filter(a =>
-      (a.username || '').toLowerCase().includes(query.toLowerCase()) ||
-      (a.email || '').toLowerCase().includes(query.toLowerCase())
-    ), [analysts, query]);
+    managers.filter(m =>
+      (m.username || '').toLowerCase().includes(query.toLowerCase()) ||
+      (m.email || '').toLowerCase().includes(query.toLowerCase())
+    ), [managers, query]);
 
   const handleToggle = async (id, isCurrentlyEnabled) => {
     setToggling(id);
-    // If currently enabled (true) → disable it (send false)
-    // If currently disabled (false) → enable it (send true)
     const newValidity = isCurrentlyEnabled ? false : true;
-    try { await changeAnalystValidity(id, newValidity); await fetch(); }
+    try { await changeProjectManagerValidity(id, newValidity); await fetch(); }
     catch { alert('Failed to update.'); }
     finally { setToggling(null); }
   };
@@ -218,12 +215,12 @@ function AnalystList() {
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
           <h2 style={{ fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.5px' }}>
-            Analysts
+            Project Managers
             <span style={{ marginLeft: 10, fontSize: '0.85rem', fontWeight: 700, background: 'rgba(79,70,229,0.1)', color: 'var(--indigo)', padding: '2px 10px', borderRadius: 20, verticalAlign: 'middle' }}>
-              {analysts.length} total
+              {managers.length} total
             </span>
           </h2>
-          <p style={{ color: 'var(--text-2)', marginTop: 2, fontSize: '0.9rem' }}>Manage all analyst accounts.</p>
+          <p style={{ color: 'var(--text-2)', marginTop: 2, fontSize: '0.9rem' }}>Manage all project manager accounts.</p>
         </div>
         <div style={{ display: 'flex', gap: '0.6rem' }}>
           {/* Search */}
@@ -243,17 +240,16 @@ function AnalystList() {
         <div className="mac-bar">Directory</div>
         <div style={{ overflowX: 'auto' }}>
           {loading ? (
-            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)' }}>Loading analysts…</div>
+            <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)' }}>Loading managers…</div>
           ) : filtered.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-3)' }}>
               <Users size={32} style={{ opacity: 0.3, marginBottom: 8 }} /><br />
-              {query ? 'No results match your search.' : 'No analysts found.'}
+              {query ? 'No results match your search.' : 'No managers found.'}
             </div>
           ) : (
             <table className="tbl">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Username</th>
                   <th>Email</th>
                   <th>Status</th>
@@ -261,25 +257,24 @@ function AnalystList() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((a, i) => (
+                {filtered.map((m, i) => (
                   <tr key={i}>
-                    <td style={{ color: 'var(--text-3)', fontFamily: 'monospace', fontSize: '0.82rem' }}>#{a.id}</td>
-                    <td style={{ fontWeight: 600 }}>{a.username}</td>
-                    <td style={{ color: 'var(--text-2)' }}>{a.email}</td>
+                    <td style={{ fontWeight: 600 }}>{m.username}</td>
+                    <td style={{ color: 'var(--text-2)' }}>{m.email}</td>
                     <td>
-                        <span className={`pill ${a.isEnabled ? 'pill-active' : 'pill-disabled'}`}>
-                          {a.isEnabled ? 'Active' : 'Disabled'}
+                        <span className={`pill ${m.isEnabled ? 'pill-active' : 'pill-disabled'}`}>
+                          {m.isEnabled ? 'Active' : 'Disabled'}
                         </span>
                       </td>
                     <td>
                       <button
-                        className={`btn btn-sm ${a.isEnabled ? 'btn-danger' : 'btn-mint'}`}
-                        disabled={toggling === a.id}
-                        onClick={() => handleToggle(a.id, a.isEnabled)}
+                        className={`btn btn-sm ${m.isEnabled ? 'btn-danger' : 'btn-mint'}`}
+                        disabled={toggling === m.id}
+                        onClick={() => handleToggle(m.id, m.isEnabled)}
                       >
-                        {toggling === a.id
+                        {toggling === m.id
                           ? '…'
-                          : a.isEnabled
+                          : m.isEnabled
                             ? <><XCircle size={12} /> Disable</>
                             : <><CheckCircle2 size={12} /> Enable</>
                         }
@@ -378,8 +373,8 @@ export default function AdminDashboard() {
   const renderPanel = () => {
     switch (active) {
       case 'overview': return <Overview self={self} />;
-      case 'create':   return <CreateAnalyst />;
-      case 'analysts': return <AnalystList />;
+      case 'create':   return <CreateProjectManager />;
+      case 'managers': return <ProjectManagerList />;
       case 'profile':  return <Profile self={self} />;
       default:         return null;
     }

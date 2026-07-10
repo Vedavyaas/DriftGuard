@@ -1,6 +1,6 @@
 package com.pheonix.authentication.repository;
 
-import com.pheonix.authentication.assets.AnalystDTO;
+import com.pheonix.authentication.assets.ProjectManagerDTO;
 import com.pheonix.authentication.assets.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -17,7 +17,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     boolean existsByEmail(String email);
 
-    List<AnalystDTO> findAllByRole(Role role);
+    List<ProjectManagerDTO> findAllByRole(Role role);
 
-    AnalystDTO findProjectedByUsername(String username);
+    ProjectManagerDTO findProjectedByUsername(String username);
 }

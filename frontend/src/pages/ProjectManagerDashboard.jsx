@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSelfInfo, changeDetails } from '../services/api';
+import { getSelfInfo, changeDetails, createProject, getProjects, changeProjectStatus, changeProjectBaseline } from '../services/api';
 import {
-  LayoutDashboard, Settings, LogOut,
-  BarChart2, CheckCircle2, AlertCircle, User
+  LayoutDashboard, Settings, LogOut, PlusCircle,
+  BarChart2, CheckCircle2, AlertCircle, User, FileUp, FolderGit2, Activity, Key
 } from 'lucide-react';
 
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+  { id: 'projects', label: 'My Projects', icon: FolderGit2 },
+  { id: 'create',   label: 'Create Project', icon: PlusCircle },
   { id: 'profile',  label: 'My Profile', icon: Settings     },
 ];
 
@@ -65,7 +67,6 @@ function Overview({ self }) {
       {/* Stat cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
         {[
-          { label: 'User ID',  value: `#${self.id}`,  color: 'var(--text-3)', mono: true },
           { label: 'Username', value: self.username,   color: 'var(--cyan)'              },
           { label: 'Email',    value: self.email,      color: 'var(--indigo)'            },
         ].map(({ label, value, color, mono }) => (
@@ -154,7 +155,7 @@ function Profile({ self }) {
             <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>{self.username}</div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>{self.email}</div>
           </div>
-          <span className="pill pill-active" style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>Analyst</span>
+          <span className="pill pill-active" style={{ marginLeft: 'auto', fontSize: '0.7rem' }}>Project Manager</span>
         </div>
       )}
 
@@ -186,8 +187,201 @@ function Profile({ self }) {
   );
 }
 
+/* ── My Projects ── */
+function ProjectsList() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [msg, setMsg] = useState(null);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const data = await getProjects();
+      setProjects(data);
+    } catch {
+      setMsg({ ok: false, text: 'Failed to load projects.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await changeProjectStatus(id, newStatus);
+      setMsg({ ok: true, text: 'Status updated successfully.' });
+      fetchProjects();
+    } catch {
+      setMsg({ ok: false, text: 'Failed to update status.' });
+    }
+  };
+
+  const handleBaselineUpload = async (id, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    try {
+      await changeProjectBaseline(id, file);
+      setMsg({ ok: true, text: 'Baseline file updated successfully.' });
+    } catch {
+      setMsg({ ok: false, text: 'Failed to update baseline file.' });
+    }
+  };
+
+  if (loading) return <div style={{ padding: '2rem', color: 'var(--text-3)' }}>Loading projects...</div>;
+
+  return (
+    <div style={{ maxWidth: 800 }}>
+      <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.5px' }}>My Projects</h2>
+          <p style={{ color: 'var(--text-2)', marginTop: 4, fontSize: '0.85rem' }}>Manage your ingested projects and configurations.</p>
+        </div>
+        <button onClick={fetchProjects} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Refresh</button>
+      </div>
+
+      <Msg msg={msg} />
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {projects.length === 0 ? (
+          <div style={{ padding: '2rem', textAlign: 'center', background: 'rgba(0,0,0,0.02)', borderRadius: 12, border: '1px dashed rgba(0,0,0,0.1)' }}>
+            <FolderGit2 size={32} color="var(--text-4)" style={{ marginBottom: '1rem' }} />
+            <div style={{ fontWeight: 600, color: 'var(--text-2)' }}>No projects found.</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-3)', marginTop: 4 }}>Create one to get started!</div>
+          </div>
+        ) : projects.map(p => (
+          <div key={p.id} className="g-card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-1)' }}>{p.projectName}</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center', gap: 6, marginTop: 4, fontFamily: 'monospace' }}>
+                  <Key size={12} /> {p.projectHash}
+                </div>
+              </div>
+              <span className={`pill ${p.status === 'FINISHED' ? 'pill-active' : p.status === 'AT_RISK' ? 'pill-danger' : 'pill-disabled'}`} style={{ fontSize: '0.7rem' }}>
+                {p.status}
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', background: 'rgba(0,0,0,0.015)', padding: '1rem', borderRadius: 10, border: '1px solid rgba(0,0,0,0.04)' }}>
+              <div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <Activity size={14} /> Update Status
+                </div>
+                <select className="inp no-icon" value={p.status} onChange={e => handleStatusChange(p.id, e.target.value)} style={{ padding: '0.4rem 0.6rem', fontSize: '0.8rem' }}>
+                  <option value="NOT_STARTED">Not Started</option>
+                  <option value="PLANNING">Planning</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="AT_RISK">At Risk</option>
+                  <option value="FINISHED">Finished</option>
+                </select>
+              </div>
+
+              <div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <FileUp size={14} /> Update Baseline File
+                </div>
+                <input type="file" onChange={e => handleBaselineUpload(p.id, e)} style={{ fontSize: '0.75rem', width: '100%' }} />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── Create Project ── */
+function CreateProject() {
+  const [form, setForm] = useState({
+    projectName: '',
+    status: 'NOT_STARTED'
+  });
+  const [file, setFile] = useState(null);
+  const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setMsg({ ok: false, text: 'A baseline configuration file is mandatory.' });
+      return;
+    }
+    setLoading(true);
+    try {
+      const credentials = {
+        projectName: form.projectName,
+        status: form.status,
+        githubIntegrationCredentials: null,
+        cloudProviderCredentials: null
+      };
+
+      const formData = new FormData();
+      formData.append('projectCreationCredentials', new Blob([JSON.stringify(credentials)], {
+        type: "application/json"
+      }));
+      formData.append('baseLineFile', file);
+
+      await createProject(formData);
+      setMsg({ ok: true, text: 'Project created successfully. Check My Projects to see your Project Hash!' });
+      setForm({ projectName: '', status: 'NOT_STARTED' });
+      setFile(null);
+    } catch {
+      setMsg({ ok: false, text: 'Failed to create project. Please check the details.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div style={{ maxWidth: 500 }}>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Register Project</h2>
+        <p style={{ color: 'var(--text-2)', marginTop: 4, fontSize: '0.85rem' }}>Register a new project to generate an automated ingestion Hash.</p>
+      </div>
+
+      <div className="g-card">
+        <div className="mac-bar">Project Details</div>
+        <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          
+          <Field label={<span>Project Name <span style={{ color: 'var(--text-3)', fontSize: '0.75rem', fontWeight: 500 }}>(Unchangeable later)</span></span>}>
+            <input className="inp no-icon" placeholder="e.g. Phoenix-Core" required value={form.projectName}
+              onChange={e => setForm({ ...form, projectName: e.target.value })} />
+          </Field>
+          
+          <Field label="Initial Status">
+            <select className="inp no-icon" value={form.status} onChange={e => setForm({ ...form, status: e.target.value })}>
+              <option value="NOT_STARTED">Not Started</option>
+              <option value="PLANNING">Planning</option>
+              <option value="IN_PROGRESS">In Progress</option>
+              <option value="AT_RISK">At Risk</option>
+              <option value="FINISHED">Finished</option>
+            </select>
+          </Field>
+
+          <div style={{ background: 'rgba(0,0,0,0.02)', padding: '1rem', borderRadius: 10, border: '1px dashed rgba(0,0,0,0.15)' }}>
+            <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <FileUp size={15} /> Baseline Configuration File <span style={{ color: 'var(--text-3)', fontSize: '0.75rem', fontWeight: 500 }}>(Required)</span>
+            </div>
+            <input type="file" required onChange={e => setFile(e.target.files[0])} style={{ fontSize: '0.8rem' }} />
+          </div>
+
+          <Msg msg={msg} />
+
+          <button className="btn btn-primary btn-full" onClick={handleSubmit} disabled={loading}
+            style={{ borderRadius: 10, padding: '0.75rem', background: 'linear-gradient(135deg,#0891b2,#059669)', boxShadow: '0 6px 18px rgba(8,145,178,0.25)' }}>
+            <PlusCircle size={15} /> {loading ? 'Registering…' : 'Register Project'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── Main ── */
-export default function AnalystDashboard() {
+export default function ProjectManagerDashboard() {
   const [active, setActive] = useState('overview');
   const [self, setSelf] = useState(null);
   const navigate = useNavigate();
@@ -201,6 +395,8 @@ export default function AnalystDashboard() {
   const renderPanel = () => {
     switch (active) {
       case 'overview': return <Overview self={self} />;
+      case 'projects': return <ProjectsList />;
+      case 'create':   return <CreateProject />;
       case 'profile':  return <Profile self={self} />;
       default:         return null;
     }
@@ -233,7 +429,7 @@ export default function AnalystDashboard() {
           </div>
           <div>
             <div style={{ fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.4px', color: 'var(--text-1)' }}>DriftGuard</div>
-            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--cyan)', letterSpacing: '0.4px', marginTop: -1 }}>ANALYST</div>
+            <div style={{ fontSize: '0.68rem', fontWeight: 600, color: 'var(--cyan)', letterSpacing: '0.4px', marginTop: -1 }}>PROJECT MANAGER</div>
           </div>
         </div>
 

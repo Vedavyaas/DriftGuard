@@ -62,27 +62,27 @@ public class UserCreationService {
         return new JWTToken(tokenValue, authentication.getName(), userRole);
     }
 
-    public String createAnalyst(AnalystCredentials analystCredentials) {
-        if (userRepository.existsByUsername(analystCredentials.username())) {
-            throw new DuplicateCredentialsException("Analyst with given name already found!");
+    public String createProjectManager(ProjectManagerCredentials credentials) {
+        if (userRepository.existsByUsername(credentials.username())) {
+            throw new DuplicateCredentialsException("Project Manager with given name already found!");
         }
 
-        if (userRepository.existsByEmail(analystCredentials.email())) {
-            throw new DuplicateCredentialsException("Analyst with given email already found!");
+        if (userRepository.existsByEmail(credentials.email())) {
+            throw new DuplicateCredentialsException("Project Manager with given email already found!");
         }
 
         // Fix: constructor is (username, email, password, role, lastUpdatedAt)
-        UserEntity user = new UserEntity(analystCredentials.username(), analystCredentials.email(), passwordEncoder.encode(analystCredentials.password()), Role.ANALYST, Instant.now());
+        UserEntity user = new UserEntity(credentials.username(), credentials.email(), passwordEncoder.encode(credentials.password()), Role.PROJECTMANAGER, Instant.now());
         userRepository.save(user);
 
-        return "Analyst account created successfully";
+        return "Project Manager account created successfully";
     }
 
-    public List<AnalystDTO> getAnalysts() {
-        return userRepository.findAllByRole(Role.ANALYST);
+    public List<ProjectManagerDTO> getProjectManagers() {
+        return userRepository.findAllByRole(Role.PROJECTMANAGER);
     }
 
-    public AnalystDTO getSelfInfo(String username) {
+    public ProjectManagerDTO getSelfInfo(String username) {
         if (!userRepository.existsByUsername(username)) {
             throw new DuplicateCredentialsException("Not found!");
         }
@@ -90,11 +90,11 @@ public class UserCreationService {
         return userRepository.findProjectedByUsername(username);
     }
 
-    public String changeAnalystValidity(Long id, boolean validity) {
+    public String changeProjectManagerValidity(Long id, boolean validity) {
         Optional<UserEntity> user = userRepository.findById(id);
 
         if (user.isEmpty()) {
-            throw new DuplicateCredentialsException("Analyst not found");
+            throw new DuplicateCredentialsException("Project Manager not found");
         }
 
         user.get().setEnabled(validity);
@@ -102,7 +102,7 @@ public class UserCreationService {
 
         userRepository.save(user.get());
 
-        return "Analyst validity updated";
+        return "Project Manager validity updated";
     }
 
     public String changeDetails(Long id, ChangeDetailsRequest request) {

@@ -32,11 +32,11 @@ public class DataSeeder implements CommandLineRunner {
             logger.info("Database seeded with admin account");
         }
 
-        if (!userRepository.existsByRole(Role.ANALYST)) {
-            UserEntity user = new UserEntity("CGAnalyst", "cganalyst@gmail.com",
-                    passwordEncoder.encode("123"), Role.ANALYST, Instant.now());
+        if (!userRepository.existsByRole(Role.PROJECTMANAGER)) {
+            UserEntity user = new UserEntity("CGManager", "cgmanager@gmail.com",
+                    passwordEncoder.encode("123"), Role.PROJECTMANAGER, Instant.now());
             userRepository.save(user);
-            logger.info("Database seeded with analyst account");
+            logger.info("Database seeded with manager account");
         }
     }
 }

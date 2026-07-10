@@ -24,26 +24,26 @@ public class UserCreationController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    @PostMapping("/create/analysts")
-    public ResponseEntity<String> createAnalysts(@RequestBody AnalystCredentials analystCredentials) {
-        return ResponseEntity.ok(userCreationService.createAnalyst(analystCredentials));
+    @PostMapping("/create/managers")
+    public ResponseEntity<String> createProjectManagers(@RequestBody ProjectManagerCredentials credentials) {
+        return ResponseEntity.ok(userCreationService.createProjectManager(credentials));
     }
 
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    @GetMapping("/get/ananlyst/info")
-    public ResponseEntity<List<AnalystDTO>> getAnalystsInfo() {
-        return ResponseEntity.ok(userCreationService.getAnalysts());
+    @GetMapping("/get/manager/info")
+    public ResponseEntity<List<ProjectManagerDTO>> getProjectManagersInfo() {
+        return ResponseEntity.ok(userCreationService.getProjectManagers());
     }
 
     @GetMapping("/get/self/info")
-    public ResponseEntity<AnalystDTO> getSelfInfo(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<ProjectManagerDTO> getSelfInfo(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(userCreationService.getSelfInfo(jwt.getSubject()));
     }
 
     @PreAuthorize("hasAuthority('SCOPE_ROLE_ADMIN')")
-    @PutMapping("/change/validity/analyst")
-    public ResponseEntity<String> changeStateOfAnalyst(@RequestParam Long id, @RequestParam boolean validity) {
-        return ResponseEntity.ok(userCreationService.changeAnalystValidity(id, validity));
+    @PutMapping("/change/validity/manager")
+    public ResponseEntity<String> changeStateOfProjectManager(@RequestParam Long id, @RequestParam boolean validity) {
+        return ResponseEntity.ok(userCreationService.changeProjectManagerValidity(id, validity));
     }
 
     @PutMapping("/change/details")
