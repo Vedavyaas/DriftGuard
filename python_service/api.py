@@ -161,12 +161,12 @@ def dashboard_summary():
         ],
     }
 
-@app.get("/report/generate")
-def generate_report():
+@app.post("/report/generate")
+def generate_report(body: BatchRequest):
     detector = get_detector()
-    raw_events = _load_events_from_csv()
+    raw_events = [e.model_dump() for e in body.events]
     if not raw_events:
-        raise HTTPException(status_code=503, detail="Event data not available")
+        raise HTTPException(status_code=400, detail="No events provided")
 
     analyzed = detector.predict_batch(raw_events)
     risky = [a for a in analyzed if a['is_risky']]

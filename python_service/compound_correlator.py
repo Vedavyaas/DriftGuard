@@ -140,14 +140,11 @@ def correlate(analyzed_events: List[Dict[str, Any]], original_events: List[Dict[
             step = template.format(system=e.get('system', e.get('control_id', 'unknown')))
             remediation_steps.append(f"[{e.get('severity', 'LOW')}] {step}")
 
-        from llm_narrative import generate_analyst_narrative
         inc_id = f"INC-{idx+1:04d}"
-        narrative = generate_analyst_narrative(
-            incident_id=inc_id,
-            domains=domains,
-            actors=actors,
-            events=component_events,
-            blast_radius=blast_radius
+        narrative = (
+            f"[COMPOUND] Detected a correlated multi-domain incident ({inc_id}) spanning {', '.join(domains)} domains. "
+            f"The combined posture degradation exposes a clear threat path: {attack_path}. "
+            f"Remediation must be sequenced: Fix visibility first, then restrict access controls."
         )
 
         incidents.append(CompoundIncident(

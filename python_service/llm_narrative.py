@@ -58,7 +58,7 @@ Be concise, realistic, and highly professional. Limit to 3 short paragraphs. Do 
 
     try:
         completion = client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            model="llama-3.1-70b-versatile",
             messages=[
                 {"role": "system", "content": "You are a professional Cyber Security Incident Response Team (CSIRT) analyst writing executive intelligence summaries."},
                 {"role": "user", "content": prompt}

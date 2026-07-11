@@ -8,6 +8,7 @@ Usage:
     python3 test_event_producer.py                     # sends 1 sample risky event
     python3 test_event_producer.py --batch             # sends 5 diverse events
     python3 test_event_producer.py --project-hash XXX  # override project hash
+    python3 test_event_producer.py --file data.json    # load events from JSON file
 
 Requirements:
     pip install kafka-python
@@ -144,8 +145,20 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="DriftGuard test event producer")
     parser.add_argument("--batch", action="store_true", help="Send all 5 sample events")
     parser.add_argument("--project-hash", type=str, help="Override project hash")
+    parser.add_argument("--file", type=str, help="Load events from a JSON file instead of using sample data")
     args = parser.parse_args()
 
-    events = SAMPLE_EVENTS if args.batch else [SAMPLE_EVENTS[0]]
+    if args.file:
+        try:
+            with open(args.file, 'r') as f:
+                events = json.load(f)
+                if not isinstance(events, list):
+                    events = [events]
+        except Exception as e:
+            print(f"Error reading JSON file {args.file}: {e}")
+            exit(1)
+    else:
+        events = SAMPLE_EVENTS if args.batch else [SAMPLE_EVENTS[0]]
+        
     print(f"Publishing {len(events)} drift event(s) to Kafka topic '{TOPIC}'...")
     send_events(events, project_hash=args.project_hash)

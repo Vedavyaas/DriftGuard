@@ -1,0 +1,18 @@
+[
+  {
+    "event_id": "EVT-CRIT-001",
+    "control_id": "CTRL-SEC-FIREWALL-01",
+    "timestamp": "2026-07-11T10:00:00Z",
+    "changed_by": "root",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "CRITICAL",
+    "parameter": "firewall_enabled",
+    "old_value": "true",
+    "new_value": "false",
+    "domain": "security",
+    "system": "aws-prod-security-sg",
+    "maintenance_window": false
+  }
+]

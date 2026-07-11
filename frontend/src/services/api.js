@@ -11,7 +11,9 @@ const getHeaders = () => {
 export const login = async (credentials) => {
     const response = await fetch(`${BASE_URL}/api/user/login`, {
         method: 'POST',
-        headers: getHeaders(),
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: JSON.stringify(credentials)
     });
     if (!response.ok) throw new Error('Login failed');
@@ -118,4 +120,75 @@ export const changeProjectBaseline = async (id, file) => {
     });
     if (!response.ok) throw new Error('Failed to change baseline');
     return response.text();
+};
+
+export const getIncidents = async () => {
+    const response = await fetch(`${INGESTOR_URL}/api/incidents`, {
+        method: 'GET',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch incidents');
+    return response.json();
+};
+
+export const injectTestEvent = async (events) => {
+    const response = await fetch(`${INGESTOR_URL}/api/events/ingest`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify(events)
+    });
+    if (!response.ok) throw new Error('Injection failed');
+    return response.json();
+};
+
+// ── Report / Project Incident API ────────────────────────────────────────────
+
+export const getProjectIncidents = async (projectHash) => {
+    const response = await fetch(`${INGESTOR_URL}/api/reports/project/${projectHash}`, {
+        method: 'GET',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch project incidents');
+    return response.json();
+};
+
+export const updateIncidentStatus = async (incidentId, status) => {
+    const response = await fetch(`${INGESTOR_URL}/api/reports/incident/${incidentId}/status?status=${status}`, {
+        method: 'PUT',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to update incident status');
+    return response.text();
+};
+
+export const generateReport = async (projectHash) => {
+    const response = await fetch(`${INGESTOR_URL}/api/reports/project/${projectHash}/generate`, {
+        method: 'GET',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to generate report');
+    return response.json();
+};
+
+export const clearProjectIncidents = async (projectHash) => {
+    const response = await fetch(`${INGESTOR_URL}/api/incidents/project/${projectHash}/clear`, {
+        method: 'DELETE',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to clear incidents');
+    return response.text();
+};
+
+export const ingestFile = async (file, projectHash) => {
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('projectHash', projectHash);
+    const response = await fetch(`${INGESTOR_URL}/api/events/ingest/file`, {
+        method: 'POST',
+        headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+        body: formData
+    });
+    if (!response.ok) throw new Error('File injection failed');
+    return response.json();
 };
