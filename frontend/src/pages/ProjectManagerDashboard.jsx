@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getSelfInfo, changeDetails, createProject, getProjects, changeProjectStatus, changeProjectBaseline, getIncidents, injectTestEvent, getProjectIncidents, updateIncidentStatus, generateReport, clearProjectIncidents, ingestFile } from '../services/api';
 import {
-  LayoutDashboard, Settings, LogOut, PlusCircle,
-  BarChart2, CheckCircle2, AlertCircle, User, FileUp, FolderGit2, Activity, Key, ShieldAlert,
-  FlaskConical, ChevronDown, ChevronUp, Send, FileText, ArrowLeft, RefreshCw, BookOpen, Shield, Clock
+  PieChart, Activity, LogOut, CheckCircle2,
+  XCircle, Clock, ShieldAlert, FileText, Settings, Key, BookOpen, ChevronRight, EyeOff, Eye, RefreshCw, FolderGit2, ArrowLeft, Shield,
+  LayoutDashboard, PlusCircle, User, AlertCircle, FileUp, FlaskConical, BarChart2, ChevronUp, ChevronDown, Send
 } from 'lucide-react';
+import { sampleCriticalSingle, sampleCompoundLowEvents, sampleInsiderThreat, sampleIndependentEvents } from '../utils/samples';
+import {
+  getSelfInfo, changeDetails, createProject, getProjects,
+  changeProjectStatus, changeProjectBaseline, getIncidents,
+  injectTestEvent, getProjectIncidents, updateIncidentStatus,
+  generateReport, clearProjectIncidents, ingestFile, updateIgnoredDomains, getDomainHealth
+} from '../services/api';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import dagre from 'dagre';
@@ -291,9 +297,12 @@ function ProjectsList() {
 const SEV_COLOR = { CRITICAL: '#ef4444', HIGH: '#f97316', MEDIUM: '#eab308', LOW: '#22c55e' };
 const STATUS_LABEL = { UNREAD: 'Unread', NOTIFIED: 'Notified', RESOLVED: 'Resolved' };
 
-function ProjectDrillDown({ project, onBack }) {
-  const [tab, setTab] = useState('incidents'); // 'incidents' | 'report' | 'analytics'
+function ProjectDrillDown({ project: initialProject, onBack }) {
+  const INTEGRATION_DOMAINS = ['AWS', 'GitHub', 'GCP', 'Azure', 'Kubernetes', 'Okta', 'Slack', 'Network', 'Database'];
+  const [project, setProject] = useState(initialProject);
+  const [tab, setTab] = useState('overview'); // 'overview' | 'incidents' | 'report'
   const [incidents, setIncidents] = useState([]);
+  const [domainHealthData, setDomainHealthData] = useState({});
   const [incLoading, setIncLoading] = useState(true);
   const [report, setReport] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
@@ -305,10 +314,17 @@ function ProjectDrillDown({ project, onBack }) {
   useEffect(() => { loadIncidents(); }, []);
 
   const loadIncidents = async () => {
-    setIncLoading(true);
-    try { setIncidents(await getProjectIncidents(project.projectHash)); }
-    catch { setIncidents([]); }
-    finally { setIncLoading(false); }
+    try {
+      setIncLoading(true);
+      const data = await getProjectIncidents(project.projectHash);
+      setIncidents(data || []);
+      const healthData = await getDomainHealth(project.projectHash);
+      setDomainHealthData(healthData || {});
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIncLoading(false);
+    }
   };
 
   const handleClearIncidents = async () => {
@@ -318,6 +334,8 @@ function ProjectDrillDown({ project, onBack }) {
       await clearProjectIncidents(project.projectHash);
       setIncidents([]);
       setSelectedInc(null);
+      const healthData = await getDomainHealth(project.projectHash);
+      setDomainHealthData(healthData || {});
     } finally { setClearing(false); }
   };
 
@@ -326,6 +344,8 @@ function ProjectDrillDown({ project, onBack }) {
     try {
       await updateIncidentStatus(incidentId, newStatus);
       setIncidents(prev => prev.map(i => i.incidentId === incidentId ? { ...i, status: newStatus } : i));
+      const healthData = await getDomainHealth(project.projectHash);
+      setDomainHealthData(healthData || {});
     } finally {
       setStatusUpdating(s => ({ ...s, [incidentId]: false }));
     }
@@ -363,7 +383,8 @@ function ProjectDrillDown({ project, onBack }) {
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem' }}>
-        {[{ id: 'incidents', label: 'Incident Log', icon: ShieldAlert },
+        {[{ id: 'overview',  label: 'Overview',      icon: Activity },
+          { id: 'incidents', label: `Incident Log (${incidents.filter(i => i.status !== 'RESOLVED').length})`, icon: ShieldAlert },
           { id: 'report',    label: 'Report',        icon: BookOpen }].map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => setTab(id)} style={{
             display: 'flex', alignItems: 'center', gap: 7,
@@ -380,6 +401,83 @@ function ProjectDrillDown({ project, onBack }) {
           <RefreshCw size={13} /> Refresh
         </button>
       </div>
+
+      {/* ── Overview Tab ──────────────────────────────────────────────────────── */}
+      {tab === 'overview' && (() => {
+        const ignoredSet = new Set((project.ignoredDomains || '').split(',').map(s => s.trim()).filter(Boolean));
+        const activeDomains = INTEGRATION_DOMAINS.filter(d => !ignoredSet.has(d));
+        const archivedDomains = INTEGRATION_DOMAINS.filter(d => ignoredSet.has(d));
+
+        const domainHealth = { ...domainHealthData };
+        INTEGRATION_DOMAINS.forEach(d => {
+           if (domainHealth[d] === undefined) domainHealth[d] = 100;
+        });
+
+        const toggleArchive = async (domain, archive) => {
+           let newSet = new Set(ignoredSet);
+           if (archive) newSet.add(domain);
+           else newSet.delete(domain);
+           
+           const newStr = Array.from(newSet).join(',');
+           try {
+              await updateIgnoredDomains(project.projectHash, newStr);
+              setProject(prev => ({ ...prev, ignoredDomains: newStr }));
+           } catch (e) {
+              alert('Failed to update domain archive status');
+           }
+        };
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div>
+              <h3 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1rem', color: 'var(--text-1)' }}>Integration Health</h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {activeDomains.map(d => {
+                  const h = domainHealth[d];
+                  const color = h < 50 ? '#ef4444' : h < 80 ? '#f59e0b' : '#10b981';
+                  return (
+                    <div key={d} className="g-card" style={{ padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '1rem', borderLeft: `3px solid ${color}` }}>
+                      <div style={{ fontWeight: 800, fontSize: '0.8rem', width: '90px' }}>{d}</div>
+                      
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flex: 1 }}>
+                        <div style={{ flex: 1, height: 4, background: 'var(--surface-3)', borderRadius: 2, overflow: 'hidden' }}>
+                           <div style={{ height: '100%', width: `${h}%`, background: color }} />
+                        </div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 800, color, width: '35px', textAlign: 'right' }}>{h}%</div>
+                      </div>
+                      
+                      <button onClick={() => toggleArchive(d, true)} style={{
+                         background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-4)', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                      }} title="Archive this domain">
+                         <EyeOff size={13} />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {archivedDomains.length > 0 && (
+              <div style={{ marginTop: '1rem' }}>
+                <h4 style={{ fontSize: '0.9rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: '1rem' }}>Archived Integrations</h4>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+                  {archivedDomains.map(d => (
+                    <div key={d} style={{ 
+                      padding: '0.5rem 1rem', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20,
+                      display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-3)'
+                    }}>
+                      <EyeOff size={14} /> {d}
+                      <button onClick={() => toggleArchive(d, false)} style={{
+                        marginLeft: '0.5rem', background: 'none', border: 'none', color: 'var(--cyan)', cursor: 'pointer', fontWeight: 700, fontSize: '0.75rem'
+                      }}>Restore</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ── Incident Log Tab ──────────────────────────────────────────────────── */}
       {tab === 'incidents' && (
@@ -897,7 +995,7 @@ function IncidentsList() {
     <div style={{ maxWidth: 900 }}>
       <div style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Threat Incidents</h2>
+          <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.5px' }}>Threat Incidents ({incidents.length})</h2>
           <p style={{ color: 'var(--text-2)', marginTop: 4, fontSize: '0.85rem' }}>AI-detected anomalies and compound threats.</p>
         </div>
         <button onClick={fetchIncidents} className="btn" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Refresh</button>
@@ -948,7 +1046,6 @@ function IncidentsList() {
 }
 
 /* ── Predefined Event Injector ── */
-import { sampleCriticalSingle, sampleCompoundLowEvents, sampleInsiderThreat } from '../utils/samples';
 
 function FileEventInjector() {
   const [open, setOpen]       = useState(false);
@@ -979,6 +1076,7 @@ function FileEventInjector() {
       if (sampleType === 'critical') events = sampleCriticalSingle;
       else if (sampleType === 'compound') events = sampleCompoundLowEvents;
       else if (sampleType === 'insider') events = sampleInsiderThreat;
+      else if (sampleType === 'independent') events = sampleIndependentEvents;
 
       // Stamp the selected project hash onto every event
       const stamped = events.map(e => ({ ...e, project_hash: selHash, timestamp: new Date().toISOString() }));
@@ -1043,6 +1141,7 @@ function FileEventInjector() {
             <option value="critical">1 Single CRITICAL Event</option>
             <option value="compound">5 LOW Events (Compound Critical)</option>
             <option value="insider">5 MIXED Events (Insider Threat)</option>
+            <option value="independent">5 INDEPENDENT Events</option>
           </select>
 
           <button onClick={handleInject} disabled={busy || !selHash} style={{

@@ -31,10 +31,12 @@ public class ThreatIncident {
     @Column(columnDefinition = "TEXT")
     private String graphData;
 
+    private String domain;
+
     public ThreatIncident() {
     }
 
-    public ThreatIncident(String incidentId, String projectHash, ProjectSeverity severity, ProjectStatus status, String problemDescription, String remediationSteps, String graphData) {
+    public ThreatIncident(String incidentId, String projectHash, ProjectSeverity severity, ProjectStatus status, String problemDescription, String remediationSteps, String graphData, String domain) {
         this.incidentId = incidentId;
         this.projectHash = projectHash;
         this.severity = severity;
@@ -43,6 +45,7 @@ public class ThreatIncident {
         this.problemDescription = problemDescription;
         this.remediationSteps = remediationSteps;
         this.graphData = graphData;
+        this.domain = domain;
     }
 
     public String getIncidentId() {
@@ -107,5 +110,13 @@ public class ThreatIncident {
 
     public void setGraphData(String graphData) {
         this.graphData = graphData;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

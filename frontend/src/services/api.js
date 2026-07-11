@@ -177,6 +177,15 @@ export const getProjectIncidents = async (projectHash) => {
     return response.json();
 };
 
+export const getDomainHealth = async (projectHash) => {
+    const response = await fetch(`${INGESTOR_URL}/api/reports/project/${projectHash}/domain-health`, {
+        method: 'GET',
+        headers: getHeaders()
+    });
+    if (!response.ok) throw new Error('Failed to fetch domain health');
+    return response.json();
+};
+
 export const updateIncidentStatus = async (incidentId, status) => {
     const response = await fetch(`${INGESTOR_URL}/api/reports/incident/${incidentId}/status?status=${status}`, {
         method: 'PUT',

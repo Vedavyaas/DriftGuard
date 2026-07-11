@@ -61,8 +61,8 @@ public class BatchCorrelationScheduler {
             severity = ProjectSeverity.valueOf(compound.getMaxSeverity().toUpperCase());
         } catch (Exception ignored) {}
 
-        String description = "Compound Incident detected involving domains: " + 
-                (compound.getDomains() != null ? String.join(", ", compound.getDomains()) : "Unknown");
+        String domainsStr = compound.getDomains() != null ? String.join(", ", compound.getDomains()) : "Unknown";
+        String description = "Compound Incident detected involving domains: " + domainsStr;
         
         String remediation = "Compliance violations: " + 
                 (compound.getComplianceViolations() != null ? String.join(", ", compound.getComplianceViolations()) : "None");
@@ -74,7 +74,8 @@ public class BatchCorrelationScheduler {
                 ProjectStatus.UNREAD,
                 description,
                 remediation,
-                "{}" // Assuming full graph logic or AI response goes here later
+                "{}", // Assuming full graph logic or AI response goes here later
+                domainsStr
         );
         incidentRepo.save(incident);
     }

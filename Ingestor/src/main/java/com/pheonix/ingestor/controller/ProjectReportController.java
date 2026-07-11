@@ -11,8 +11,6 @@ import com.pheonix.ingestor.repository.RawDriftEventRepository;
 import com.pheonix.ingestor.repository.ThreatIncidentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -47,6 +45,35 @@ public class ProjectReportController {
     public ResponseEntity<List<ThreatIncident>> getProjectIncidents(
             @PathVariable String projectHash) {
         return ResponseEntity.ok(incidentRepo.findByProjectHashOrderByDetectedAtDesc(projectHash));
+    }
+
+    /** Domain health for a specific project. */
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_PROJECTMANAGER')")
+    @GetMapping("/project/{projectHash}/domain-health")
+    public ResponseEntity<Map<String, Integer>> getDomainHealth(@PathVariable String projectHash) {
+        List<String> domains = List.of("AWS", "GitHub", "GCP", "Azure", "Kubernetes", "Okta", "Slack", "Network", "Database");
+        Map<String, Integer> domainHealth = new java.util.HashMap<>();
+        for (String d : domains) {
+            domainHealth.put(d, 100);
+        }
+
+        List<ThreatIncident> incidents = incidentRepo.findByProjectHashOrderByDetectedAtDesc(projectHash);
+        for (ThreatIncident inc : incidents) {
+            if (inc.getStatus() != com.pheonix.ingestor.assets.ProjectStatus.RESOLVED && inc.getDomain() != null) {
+                if (domainHealth.containsKey(inc.getDomain())) {
+                    int penalty = 0;
+                    if (inc.getSeverity() == com.pheonix.ingestor.assets.ProjectSeverity.CRITICAL) penalty = 20;
+                    else if (inc.getSeverity() == com.pheonix.ingestor.assets.ProjectSeverity.HIGH) penalty = 10;
+                    else if (inc.getSeverity() == com.pheonix.ingestor.assets.ProjectSeverity.MEDIUM) penalty = 5;
+                    else if (inc.getSeverity() == com.pheonix.ingestor.assets.ProjectSeverity.LOW) penalty = 1;
+
+                    int currentHealth = domainHealth.get(inc.getDomain());
+                    domainHealth.put(inc.getDomain(), Math.max(0, currentHealth - penalty));
+                }
+            }
+        }
+
+        return ResponseEntity.ok(domainHealth);
     }
 
     /** Global summary counts. */

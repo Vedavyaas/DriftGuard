@@ -11,7 +11,7 @@ export const sampleCriticalSingle = [
     "parameter": "firewall_enabled",
     "old_value": "true",
     "new_value": "false",
-    "domain": "security",
+    "domain": "AWS",
     "system": "aws-prod-security-sg",
     "maintenance_window": false
   }
@@ -30,7 +30,7 @@ export const sampleCompoundLowEvents = [
     "parameter": "iam_role_permissions",
     "old_value": "read_only",
     "new_value": "read_write",
-    "domain": "cloud",
+    "domain": "AWS",
     "system": "aws-prod-iam",
     "maintenance_window": false
   },
@@ -46,7 +46,7 @@ export const sampleCompoundLowEvents = [
     "parameter": "security_group_port_3389",
     "old_value": "closed",
     "new_value": "open",
-    "domain": "network",
+    "domain": "Network",
     "system": "aws-prod-sg-rdp",
     "maintenance_window": false
   },
@@ -62,7 +62,7 @@ export const sampleCompoundLowEvents = [
     "parameter": "mfa_enforcement",
     "old_value": "enabled",
     "new_value": "disabled",
-    "domain": "identity",
+    "domain": "Okta",
     "system": "aws-prod-cognito",
     "maintenance_window": false
   },
@@ -78,7 +78,7 @@ export const sampleCompoundLowEvents = [
     "parameter": "s3_bucket_public_access",
     "old_value": "blocked",
     "new_value": "allowed",
-    "domain": "data",
+    "domain": "Database",
     "system": "aws-prod-s3-assets",
     "maintenance_window": false
   },
@@ -94,7 +94,7 @@ export const sampleCompoundLowEvents = [
     "parameter": "cloudtrail_logging",
     "old_value": "enabled",
     "new_value": "disabled",
-    "domain": "cloud",
+    "domain": "GCP",
     "system": "aws-prod-cloudtrail",
     "maintenance_window": false
   }
@@ -113,7 +113,7 @@ export const sampleInsiderThreat = [
     "parameter": "edr_agent_enabled",
     "old_value": "true",
     "new_value": "false",
-    "domain": "endpoint",
+    "domain": "Azure",
     "system": "windows-prod-workstation-14",
     "maintenance_window": false
   },
@@ -129,7 +129,7 @@ export const sampleInsiderThreat = [
     "parameter": "vpn_split_tunneling",
     "old_value": "disabled",
     "new_value": "enabled",
-    "domain": "network",
+    "domain": "Network",
     "system": "corp-vpn-gateway",
     "maintenance_window": false
   },
@@ -145,7 +145,7 @@ export const sampleInsiderThreat = [
     "parameter": "privileged_access_review",
     "old_value": "enabled",
     "new_value": "disabled",
-    "domain": "identity",
+    "domain": "Okta",
     "system": "active-directory-prod",
     "maintenance_window": false
   },
@@ -161,7 +161,7 @@ export const sampleInsiderThreat = [
     "parameter": "usb_storage_policy",
     "old_value": "blocked",
     "new_value": "allowed",
-    "domain": "endpoint",
+    "domain": "Kubernetes",
     "system": "windows-prod-workstation-14",
     "maintenance_window": false
   },
@@ -177,8 +177,91 @@ export const sampleInsiderThreat = [
     "parameter": "dlp_policy_enforcement",
     "old_value": "strict",
     "new_value": "off",
-    "domain": "data",
+    "domain": "GitHub",
     "system": "corp-dlp-engine",
+    "maintenance_window": false
+  }
+];
+
+export const sampleIndependentEvents = [
+  {
+    "event_id": "EVT-IND-001",
+    "control_id": "CTRL-DB-01",
+    "timestamp": new Date(Date.now() - 50*60000).toISOString(),
+    "changed_by": "db-admin",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "HIGH",
+    "parameter": "database_encryption_at_rest",
+    "old_value": "enabled",
+    "new_value": "disabled",
+    "domain": "Database",
+    "system": "prod-postgres-cluster",
+    "maintenance_window": false
+  },
+  {
+    "event_id": "EVT-IND-002",
+    "control_id": "CTRL-NET-02",
+    "timestamp": new Date(Date.now() - 45*60000).toISOString(),
+    "changed_by": "net-admin",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "MEDIUM",
+    "parameter": "public_ip_assigned",
+    "old_value": "false",
+    "new_value": "true",
+    "domain": "Network",
+    "system": "prod-lb-external",
+    "maintenance_window": false
+  },
+  {
+    "event_id": "EVT-IND-003",
+    "control_id": "CTRL-GIT-03",
+    "timestamp": new Date(Date.now() - 40*60000).toISOString(),
+    "changed_by": "dev-lead",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "HIGH",
+    "parameter": "branch_protection_rules",
+    "old_value": "enforced",
+    "new_value": "bypassed",
+    "domain": "GitHub",
+    "system": "core-backend-repo",
+    "maintenance_window": false
+  },
+  {
+    "event_id": "EVT-IND-004",
+    "control_id": "CTRL-IAM-04",
+    "timestamp": new Date(Date.now() - 35*60000).toISOString(),
+    "changed_by": "sec-ops",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "MEDIUM",
+    "parameter": "session_timeout",
+    "old_value": "60_minutes",
+    "new_value": "infinite",
+    "domain": "Okta",
+    "system": "corporate-sso",
+    "maintenance_window": false
+  },
+  {
+    "event_id": "EVT-IND-005",
+    "control_id": "CTRL-K8S-05",
+    "timestamp": new Date(Date.now() - 30*60000).toISOString(),
+    "changed_by": "k8s-admin",
+    "change_source": "manual",
+    "approval_status": "pending",
+    "environment": "production",
+    "severity": "CRITICAL",
+    "parameter": "pod_privileged_mode",
+    "old_value": "false",
+    "new_value": "true",
+    "domain": "Kubernetes",
+    "system": "prod-k8s-cluster",
     "maintenance_window": false
   }
 ];
