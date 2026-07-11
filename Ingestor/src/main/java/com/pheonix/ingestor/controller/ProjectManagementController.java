@@ -41,6 +41,12 @@ public class ProjectManagementController {
     }
 
     @PreAuthorize("hasAuthority('SCOPE_ROLE_PROJECTMANAGER')")
+    @PutMapping("/change/ignored-domains")
+    public ResponseEntity<String> changeIgnoredDomains(@RequestParam String hash, @RequestParam String ignoredDomains, @AuthenticationPrincipal Jwt jwt) {
+        return ResponseEntity.ok(projectManagementService.changeIgnoredDomains(hash, ignoredDomains, jwt.getSubject()));
+    }
+
+    @PreAuthorize("hasAuthority('SCOPE_ROLE_PROJECTMANAGER')")
     @GetMapping("/get/project/info")
     public ResponseEntity<List<ProjectDTO>> getProjectInfo(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(projectManagementService.getInfo(jwt.getSubject()));

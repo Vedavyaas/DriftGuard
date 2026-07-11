@@ -32,13 +32,15 @@ public class DriftEventKafkaConsumer {
     private final MLIntelligenceClient mlClient;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
+    private final ProjectHealthService projectHealthService;
 
     public DriftEventKafkaConsumer(ProjectManagerRepository projectRepo,
                                    ThreatIncidentRepository incidentRepo,
                                    RawDriftEventRepository rawEventRepo,
                                    EventBufferService bufferService,
                                    MLIntelligenceClient mlClient,
-                                   KafkaTemplate<String, String> kafkaTemplate) {
+                                   KafkaTemplate<String, String> kafkaTemplate,
+                                   ProjectHealthService projectHealthService) {
         this.projectRepo = projectRepo;
         this.incidentRepo = incidentRepo;
         this.rawEventRepo = rawEventRepo;
@@ -46,6 +48,7 @@ public class DriftEventKafkaConsumer {
         this.mlClient = mlClient;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
+        this.projectHealthService = projectHealthService;
     }
 
     @Transactional
@@ -78,13 +81,11 @@ public class DriftEventKafkaConsumer {
             PythonResponse single = mlClient.analyzeSingleEvent(event);
             if (single != null && Boolean.TRUE.equals(single.getIsRisky())) {
                 String severity = single.getSeverity();
-                if ("CRITICAL".equalsIgnoreCase(severity) || "HIGH".equalsIgnoreCase(severity)) {
-                    String incidentId = saveIncidentFromSingleResponse(projectHash, event, single);
-                    // Immediately email manager for CRITICAL events
-                    if ("CRITICAL".equalsIgnoreCase(severity)) {
-                        sendEmailAlert(managerName, incidentId, severity,
-                                event.getSystem(), event.getDomain());
-                    }
+                String incidentId = saveIncidentFromSingleResponse(projectHash, event, single);
+                // Immediately email manager for CRITICAL events
+                if ("CRITICAL".equalsIgnoreCase(severity)) {
+                    sendEmailAlert(managerName, incidentId, severity,
+                            event.getSystem(), event.getDomain());
                 }
             }
 
@@ -171,6 +172,7 @@ public class DriftEventKafkaConsumer {
         try { severity = ProjectSeverity.valueOf(severityStr.toUpperCase()); } catch (Exception ignored) {}
         String id = UUID.randomUUID().toString();
         incidentRepo.save(new ThreatIncident(id, projectHash, severity, ProjectStatus.UNREAD, description, remediation, graphData));
+        projectHealthService.updateProjectHealth(projectHash);
         return id;
     }
 

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   getSelfInfo, getProjectManagersInfo, createProjectManager,
-  changeProjectManagerValidity, changeDetails
+  changeProjectManagerValidity, changeDetails, getAdminManagerStats
 } from '../services/api';
 import {
   ShieldCheck, Users, UserPlus, Settings, LogOut,
@@ -42,9 +42,79 @@ function Msg({ msg }) {
 }
 
 /* ─────────────────────────────────────────
-   Panels
+   Manager Comparison Visuals
 ───────────────────────────────────────── */
+function ManagerComparisonChart({ managerStats }) {
+  if (!managerStats || managerStats.length === 0) return null;
+  // Sort by lowest health first (needs attention)
+  const sorted = [...managerStats].sort((a, b) => a.averageHealth - b.averageHealth);
+  
+  return (
+    <div className="g-card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-3)' }}>Average Health by Manager</div>
+      {sorted.map(m => {
+        const h = m.averageHealth;
+        const color = h < 50 ? '#ef4444' : h < 80 ? '#f59e0b' : '#10b981';
+        return (
+          <div key={m.managerName} style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ width: 120, fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-1)' }}>{m.managerName}</div>
+            <div style={{ flex: 1, height: 16, background: 'var(--surface-3)', borderRadius: 8, overflow: 'hidden' }}>
+              <div style={{ width: `${h}%`, height: '100%', background: color, transition: 'width 0.3s ease' }} />
+            </div>
+            <div style={{ width: 40, textAlign: 'right', fontSize: '0.8rem', fontWeight: 700, color }}>{Math.round(h)}%</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function ProjectHealthList({ projectsHealth }) {
+  if (!projectsHealth || projectsHealth.length === 0) return null;
+  
+  return (
+    <div className="g-card" style={{ overflow: 'hidden' }}>
+      <div className="mac-bar">Project Health Status</div>
+      <table className="tbl">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Manager</th>
+            <th>Health Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {projectsHealth.map((p, i) => {
+             const h = p.healthScore;
+             const color = h < 50 ? '#ef4444' : h < 80 ? '#f59e0b' : '#10b981';
+             return (
+              <tr key={i}>
+                <td style={{ fontWeight: 600 }}>{p.projectName}</td>
+                <td style={{ color: 'var(--text-2)' }}>{p.managerName}</td>
+                <td style={{ fontWeight: 700, color }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div style={{ width: 40 }}>{Math.round(h)}%</div>
+                    <div style={{ width: 60, height: 6, background: 'var(--surface-3)', borderRadius: 3 }}>
+                      <div style={{ width: `${h}%`, height: '100%', background: color, borderRadius: 3 }} />
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Overview({ self }) {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    getAdminManagerStats().then(setStats).catch(() => {});
+  }, []);
+
   if (!self) return <div style={{ color: 'var(--text-3)', padding: '2rem' }}>Loading…</div>;
 
   const fmt = (ts) => ts
@@ -71,58 +141,44 @@ function Overview({ self }) {
             Welcome back, {self.username} 👋
           </h2>
           <p style={{ color: 'var(--text-2)', marginTop: 2, fontSize: '0.9rem' }}>
-            Here's everything about your account.
+            System overview and manager performance.
           </p>
         </div>
       </div>
 
-      {/* Stat grid */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
-        {[
-          { label: 'Username', value: self.username,   color: 'var(--indigo)'             },
-          { label: 'Email',    value: self.email,      color: 'var(--cyan)'               },
-        ].map(({ label, value, color, mono }) => (
-          <div key={label} className="g-panel" style={{ padding: '1.1rem 1.25rem' }}>
-            <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px', color: 'var(--text-3)', marginBottom: 6 }}>
-              {label}
+      {/* Admin Overall Health & Stats */}
+      {stats && (
+        <div className="g-card" style={{ padding: '2rem', background: 'linear-gradient(135deg, rgba(79,70,229,0.05), rgba(8,145,178,0.05))', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--indigo)', letterSpacing: '1px' }}>
+              Overall System Health
             </div>
-            <div style={{ fontSize: '1rem', fontWeight: 700, color, fontFamily: mono ? 'monospace' : 'inherit', wordBreak: 'break-all' }}>
-              {value || '—'}
+            <div style={{ fontSize: '3rem', fontWeight: 900, color: 'var(--text-1)', lineHeight: 1 }}>
+              {stats.overall_system_health}%
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Account status + timestamps */}
-      <div className="g-card" style={{ overflow: 'hidden' }}>
-        <div className="mac-bar">Account Details</div>
-        <div style={{ padding: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.25rem' }}>
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-3)', marginBottom: 8 }}>
-              Account Status
-            </div>
-            <span className={`pill ${self.isEnabled ? 'pill-active' : 'pill-disabled'}`} style={{ fontSize: '0.85rem', padding: '5px 14px' }}>
-              {self.isEnabled ? 'Active' : 'Disabled'}
-            </span>
-          </div>
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-3)', marginBottom: 8 }}>
-              Member Since
-            </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>
-              {fmt(self.createdAt)}
-            </div>
-          </div>
-          <div>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-3)', marginBottom: 8 }}>
-              Last Updated
-            </div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-1)' }}>
-              {fmt(self.lastUpdatedAt)}
-            </div>
+          <div style={{ display: 'flex', gap: '2rem' }}>
+             <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--text-1)' }}>{stats.manager_stats?.reduce((acc, m) => acc + m.projectCount, 0) || 0}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 600 }}>Total Projects</div>
+             </div>
+             <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#ef4444' }}>{stats.manager_stats?.reduce((acc, m) => acc + m.activeIncidents, 0) || 0}</div>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 600 }}>Active Incidents</div>
+             </div>
           </div>
         </div>
-      </div>
+      )}
+
+      {/* Manager Comparison Grid */}
+      {stats && stats.manager_stats && (
+        <ManagerComparisonChart managerStats={stats.manager_stats} />
+      )}
+
+      {/* Projects List */}
+      {stats && stats.projects_health && (
+        <ProjectHealthList projectsHealth={stats.projects_health} />
+      )}
 
     </div>
   );

@@ -12,9 +12,12 @@ import java.util.List;
 public class ThreatIncidentController {
 
     private final ThreatIncidentRepository incidentRepo;
+    private final com.pheonix.ingestor.service.ProjectHealthService projectHealthService;
 
-    public ThreatIncidentController(ThreatIncidentRepository incidentRepo) {
+    public ThreatIncidentController(ThreatIncidentRepository incidentRepo,
+                                    com.pheonix.ingestor.service.ProjectHealthService projectHealthService) {
         this.incidentRepo = incidentRepo;
+        this.projectHealthService = projectHealthService;
     }
 
     @GetMapping
@@ -47,6 +50,7 @@ public class ThreatIncidentController {
     public ResponseEntity<String> clearProjectIncidents(@PathVariable String projectHash) {
         List<ThreatIncident> incidents = incidentRepo.findByProjectHash(projectHash);
         incidentRepo.deleteAll(incidents);
+        projectHealthService.updateProjectHealth(projectHash);
         return ResponseEntity.ok("Cleared " + incidents.size() + " incident(s) for project " + projectHash);
     }
 }

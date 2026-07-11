@@ -67,6 +67,18 @@ public class ProjectManagementService {
     }
 
     @Transactional
+    public String changeIgnoredDomains(String projectHash, String ignoredDomains, String managerName) {
+        ProjectManagerEntity projectManagerEntity = projectManagerRepository.findByProjectHash(projectHash)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+        if (!projectManagerEntity.getManagerName().equals(managerName)) {
+            throw new RuntimeException("Unauthorized");
+        }
+        projectManagerEntity.setIgnoredDomains(ignoredDomains);
+        projectManagerRepository.save(projectManagerEntity);
+        return "Ignored domains updated successfully";
+    }
+
+    @Transactional
     public String changeBaseLineFile(Long id, MultipartFile baseLineFile, String managerName) {
         ProjectManagerEntity projectManagerEntity = projectManagerRepository.findById(id).orElseThrow(() -> new RuntimeException("Project not found"));
         if (!projectManagerEntity.getManagerName().equals(managerName)) {

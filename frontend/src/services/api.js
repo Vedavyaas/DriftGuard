@@ -59,6 +59,7 @@ export const getProjectManagersInfo = async () => {
     return response.json();
 };
 
+
 export const changeProjectManagerValidity = async (id, validity) => {
     const response = await fetch(`${BASE_URL}/change/validity/manager?id=${id}&validity=${validity}`, {
         method: 'PUT',
@@ -69,6 +70,18 @@ export const changeProjectManagerValidity = async (id, validity) => {
 };
 
 const INGESTOR_URL = 'http://localhost:9000/INGESTOR';
+
+export const getAdminManagerStats = async () => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${INGESTOR_URL}/api/reports/admin/manager-stats`, {
+        method: 'GET',
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+    });
+    if (!response.ok) throw new Error('Failed to fetch manager stats');
+    return response.json();
+};
 
 export const createProject = async (formData) => {
     const token = localStorage.getItem('token');
@@ -103,6 +116,18 @@ export const changeProjectStatus = async (id, status) => {
         }
     });
     if (!response.ok) throw new Error('Failed to change status');
+    return response.text();
+};
+
+export const updateIgnoredDomains = async (hash, ignoredDomains) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch(`${INGESTOR_URL}/change/ignored-domains?hash=${hash}&ignoredDomains=${encodeURIComponent(ignoredDomains)}`, {
+        method: 'PUT',
+        headers: {
+            ...(token ? { Authorization: `Bearer ${token}` } : {})
+        }
+    });
+    if (!response.ok) throw new Error('Failed to update ignored domains');
     return response.text();
 };
 

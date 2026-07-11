@@ -20,6 +20,11 @@ public class ProjectManagerEntity {
     @Column(columnDefinition="bytea")
     private byte[] baselineFile;
 
+    private Integer healthScore = 100;
+    
+    @Column(columnDefinition = "TEXT")
+    private String ignoredDomains = "";
+
     public ProjectManagerEntity() {
     }
 
@@ -84,5 +89,21 @@ public class ProjectManagerEntity {
 
     public void setProjectHash(String projectHash) {
         this.projectHash = projectHash;
+    }
+
+    public Integer getHealthScore() {
+        return healthScore;
+    }
+
+    public void setHealthScore(Integer healthScore) {
+        this.healthScore = healthScore;
+    }
+
+    public String getIgnoredDomains() {
+        return ignoredDomains;
+    }
+
+    public void setIgnoredDomains(String ignoredDomains) {
+        this.ignoredDomains = ignoredDomains;
     }
 }
