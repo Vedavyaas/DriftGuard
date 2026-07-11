@@ -1,0 +1,860 @@
+[
+    {
+        "control_id": "CLO-001",
+        "domain": "cloud",
+        "system": "AWS CloudTrail",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "CLO-002",
+        "domain": "cloud",
+        "system": "AWS CloudTrail",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "CLO-003",
+        "domain": "cloud",
+        "system": "AWS CloudTrail",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "CLO-004",
+        "domain": "cloud",
+        "system": "AWS CloudTrail",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "CLO-005",
+        "domain": "cloud",
+        "system": "AWS CloudTrail",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "CLO-006",
+        "domain": "cloud",
+        "system": "AWS KMS",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "CLO-007",
+        "domain": "cloud",
+        "system": "AWS KMS",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "CLO-008",
+        "domain": "cloud",
+        "system": "AWS KMS",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "CLO-009",
+        "domain": "cloud",
+        "system": "AWS KMS",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "CLO-010",
+        "domain": "cloud",
+        "system": "AWS KMS",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "CLO-011",
+        "domain": "cloud",
+        "system": "Azure KeyVault",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "CLO-012",
+        "domain": "cloud",
+        "system": "Azure KeyVault",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "CLO-013",
+        "domain": "cloud",
+        "system": "Azure KeyVault",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "CLO-014",
+        "domain": "cloud",
+        "system": "Azure KeyVault",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "CLO-015",
+        "domain": "cloud",
+        "system": "Azure KeyVault",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "CLO-016",
+        "domain": "cloud",
+        "system": "S3 Storage Bucket",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "CLO-017",
+        "domain": "cloud",
+        "system": "S3 Storage Bucket",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "development",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "CLO-018",
+        "domain": "cloud",
+        "system": "S3 Storage Bucket",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "CLO-019",
+        "domain": "cloud",
+        "system": "S3 Storage Bucket",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "CLO-020",
+        "domain": "cloud",
+        "system": "S3 Storage Bucket",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "NET-021",
+        "domain": "network",
+        "system": "Palo Alto Firewall",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "NET-022",
+        "domain": "network",
+        "system": "Palo Alto Firewall",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "NET-023",
+        "domain": "network",
+        "system": "Palo Alto Firewall",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "development",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "NET-024",
+        "domain": "network",
+        "system": "Palo Alto Firewall",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "NET-025",
+        "domain": "network",
+        "system": "Palo Alto Firewall",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "NET-026",
+        "domain": "network",
+        "system": "Cisco Core Switch",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "NET-027",
+        "domain": "network",
+        "system": "Cisco Core Switch",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "NET-028",
+        "domain": "network",
+        "system": "Cisco Core Switch",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "NET-029",
+        "domain": "network",
+        "system": "Cisco Core Switch",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "NET-030",
+        "domain": "network",
+        "system": "Cisco Core Switch",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "NET-031",
+        "domain": "network",
+        "system": "AWS Security Group",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "NET-032",
+        "domain": "network",
+        "system": "AWS Security Group",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "NET-033",
+        "domain": "network",
+        "system": "AWS Security Group",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "NET-034",
+        "domain": "network",
+        "system": "AWS Security Group",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "NET-035",
+        "domain": "network",
+        "system": "AWS Security Group",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "END-036",
+        "domain": "endpoint",
+        "system": "CrowdStrike Falcon",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "END-037",
+        "domain": "endpoint",
+        "system": "CrowdStrike Falcon",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "development",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "END-038",
+        "domain": "endpoint",
+        "system": "CrowdStrike Falcon",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "END-039",
+        "domain": "endpoint",
+        "system": "CrowdStrike Falcon",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "END-040",
+        "domain": "endpoint",
+        "system": "CrowdStrike Falcon",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "END-041",
+        "domain": "endpoint",
+        "system": "Defender for Endpoint",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "END-042",
+        "domain": "endpoint",
+        "system": "Defender for Endpoint",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "END-043",
+        "domain": "endpoint",
+        "system": "Defender for Endpoint",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "END-044",
+        "domain": "endpoint",
+        "system": "Defender for Endpoint",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "END-045",
+        "domain": "endpoint",
+        "system": "Defender for Endpoint",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "END-046",
+        "domain": "endpoint",
+        "system": "Osquery Agent",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "END-047",
+        "domain": "endpoint",
+        "system": "Osquery Agent",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "END-048",
+        "domain": "endpoint",
+        "system": "Osquery Agent",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "END-049",
+        "domain": "endpoint",
+        "system": "Osquery Agent",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "END-050",
+        "domain": "endpoint",
+        "system": "Osquery Agent",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "IDE-051",
+        "domain": "identity",
+        "system": "Okta Tenant",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "IDE-052",
+        "domain": "identity",
+        "system": "Okta Tenant",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "IDE-053",
+        "domain": "identity",
+        "system": "Okta Tenant",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "development",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "IDE-054",
+        "domain": "identity",
+        "system": "Okta Tenant",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "IDE-055",
+        "domain": "identity",
+        "system": "Okta Tenant",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "IDE-056",
+        "domain": "identity",
+        "system": "Azure AD Conditional Access",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "IDE-057",
+        "domain": "identity",
+        "system": "Azure AD Conditional Access",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "staging",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "IDE-058",
+        "domain": "identity",
+        "system": "Azure AD Conditional Access",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "IDE-059",
+        "domain": "identity",
+        "system": "Azure AD Conditional Access",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "staging",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "IDE-060",
+        "domain": "identity",
+        "system": "Azure AD Conditional Access",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    },
+    {
+        "control_id": "IDE-061",
+        "domain": "identity",
+        "system": "AWS IAM",
+        "parameter": "logging_enabled",
+        "baseline_value": true,
+        "environment": "production",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST AU-2",
+            "NIST CM-3",
+            "CIS 8.5"
+        ]
+    },
+    {
+        "control_id": "IDE-062",
+        "domain": "identity",
+        "system": "AWS IAM",
+        "parameter": "encryption_strength",
+        "baseline_value": "AES-256",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST SC-28",
+            "GDPR Art 32"
+        ]
+    },
+    {
+        "control_id": "IDE-063",
+        "domain": "identity",
+        "system": "AWS IAM",
+        "parameter": "inbound_rules",
+        "baseline_value": "RESTRICTED",
+        "environment": "production",
+        "severity_if_drifted": "HIGH",
+        "compliance_mappings": [
+            "NIST CM-6",
+            "CIS 4.1"
+        ]
+    },
+    {
+        "control_id": "IDE-064",
+        "domain": "identity",
+        "system": "AWS IAM",
+        "parameter": "agent_status",
+        "baseline_value": "running",
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST SI-4",
+            "CIS 2.1"
+        ]
+    },
+    {
+        "control_id": "IDE-065",
+        "domain": "identity",
+        "system": "AWS IAM",
+        "parameter": "mfa_enforced",
+        "baseline_value": true,
+        "environment": "development",
+        "severity_if_drifted": "CRITICAL",
+        "compliance_mappings": [
+            "NIST IA-2",
+            "GDPR Art 25"
+        ]
+    }
+]
