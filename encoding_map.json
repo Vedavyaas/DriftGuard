@@ -1,0 +1,25 @@
+{
+    "change_source": [
+        "automation",
+        "ci_cd",
+        "manual",
+        "scheduled_task"
+    ],
+    "approval_status": [
+        "approved",
+        "expired",
+        "pending"
+    ],
+    "environment": [
+        "development",
+        "production",
+        "staging"
+    ],
+    "severity": [
+        "CRITICAL",
+        "HIGH",
+        "INFO",
+        "LOW",
+        "MEDIUM"
+    ]
+}
