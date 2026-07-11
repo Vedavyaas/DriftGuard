@@ -21,7 +21,8 @@ public class SimpleMailSender {
 
     @KafkaListener(topics = "mail_listener", groupId = "mailGroup")
     public void listen(String message) {
-        Optional<UserEntity> userEntity = userRepository.findByUsername(message);
+        String[] messageInfo = message.split(" "); //manager name + " " + message to be delivered
+        Optional<UserEntity> userEntity = userRepository.findByUsername(messageInfo[0]);
         if (userEntity.isEmpty()) {
             //assume background error
             return;
@@ -34,8 +35,7 @@ public class SimpleMailSender {
         simpleMailMessage.setFrom("noreply@driftguard.com");
         simpleMailMessage.setTo(emailId);
         simpleMailMessage.setSubject("DriftGuard Alert: Critical Infrastructure Drift Detected!");
-        simpleMailMessage.setText("URGENT: A high-severity anomaly or drift has been detected in your monitored infrastructure.\n\n" +
-                "Please log into the DriftGuard dashboard immediately to view the Blast Radius graph and LLM remediation steps.");
+        simpleMailMessage.setText("URGENT: " + messageInfo[1]);
 
         mailSender.send(simpleMailMessage);
     }
