@@ -10,24 +10,35 @@ public class DriftEventNode {
     private String eventId;
     
     private String timestamp;
+    private String parameter;
+    private String baselineValue;
     private String currentValue;
     private String changeSource;
     private String approvalStatus;
-    private Boolean isRisky;
+    private String environment;
+    private Boolean isMaintenanceWindow;
     private String severity;
+    private Boolean isRisky;
+    private Boolean predictedRisky;
 
-    @Relationship(type = "AFFECTS_CONTROL", direction = Relationship.Direction.OUTGOING)
+    @Relationship(type = "AFFECTS", direction = Relationship.Direction.OUTGOING)
     private ControlNode control;
 
-    @Relationship(type = "OCCURRED_DURING", direction = Relationship.Direction.OUTGOING)
-    private MaintenanceWindowNode maintenanceWindow;
-    
+    @Relationship(type = "TRIGGERED_BY", direction = Relationship.Direction.OUTGOING)
+    private ActorNode triggeredBy;
+
     // Getters and Setters
     public String getEventId() { return eventId; }
     public void setEventId(String eventId) { this.eventId = eventId; }
 
     public String getTimestamp() { return timestamp; }
     public void setTimestamp(String timestamp) { this.timestamp = timestamp; }
+
+    public String getParameter() { return parameter; }
+    public void setParameter(String parameter) { this.parameter = parameter; }
+
+    public String getBaselineValue() { return baselineValue; }
+    public void setBaselineValue(String baselineValue) { this.baselineValue = baselineValue; }
 
     public String getCurrentValue() { return currentValue; }
     public void setCurrentValue(String currentValue) { this.currentValue = currentValue; }
@@ -38,15 +49,24 @@ public class DriftEventNode {
     public String getApprovalStatus() { return approvalStatus; }
     public void setApprovalStatus(String approvalStatus) { this.approvalStatus = approvalStatus; }
 
-    public Boolean getIsRisky() { return isRisky; }
-    public void setIsRisky(Boolean isRisky) { this.isRisky = isRisky; }
+    public String getEnvironment() { return environment; }
+    public void setEnvironment(String environment) { this.environment = environment; }
+
+    public Boolean getIsMaintenanceWindow() { return isMaintenanceWindow; }
+    public void setIsMaintenanceWindow(Boolean maintenanceWindow) { isMaintenanceWindow = maintenanceWindow; }
 
     public String getSeverity() { return severity; }
     public void setSeverity(String severity) { this.severity = severity; }
 
+    public Boolean getIsRisky() { return isRisky; }
+    public void setIsRisky(Boolean risky) { isRisky = risky; }
+
+    public Boolean getPredictedRisky() { return predictedRisky; }
+    public void setPredictedRisky(Boolean predictedRisky) { this.predictedRisky = predictedRisky; }
+
     public ControlNode getControl() { return control; }
     public void setControl(ControlNode control) { this.control = control; }
 
-    public MaintenanceWindowNode getMaintenanceWindow() { return maintenanceWindow; }
-    public void setMaintenanceWindow(MaintenanceWindowNode maintenanceWindow) { this.maintenanceWindow = maintenanceWindow; }
+    public ActorNode getTriggeredBy() { return triggeredBy; }
+    public void setTriggeredBy(ActorNode triggeredBy) { this.triggeredBy = triggeredBy; }
 }

@@ -1,9 +1,9 @@
 package com.pheonix.ingestor.neo4j.repository;
 
-import com.pheonix.ingestor.neo4j.MaintenanceWindowNode;
+import com.pheonix.ingestor.neo4j.BlastRadiusOutputNode;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface MaintenanceWindowRepository extends Neo4jRepository<MaintenanceWindowNode, String> {
+public interface BlastRadiusOutputRepository extends Neo4jRepository<BlastRadiusOutputNode, String> {
 }

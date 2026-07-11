@@ -12,14 +12,11 @@ public class ControlNode {
     @Id
     private String controlId;
     
-    // To ensure O(1) retrieval, you can run a Cypher Hash Index constraint on this property in the database.
     @Property("project_hash")
     private String projectHash;
     
     private String domain;
     private String system;
-    private String parameter;
-    private String baselineValue;
     private String environment;
     private String severityIfDrifted;
 
@@ -29,28 +26,22 @@ public class ControlNode {
     // Getters and Setters
     public String getControlId() { return controlId; }
     public void setControlId(String controlId) { this.controlId = controlId; }
-    
+
     public String getProjectHash() { return projectHash; }
     public void setProjectHash(String projectHash) { this.projectHash = projectHash; }
-    
+
     public String getDomain() { return domain; }
     public void setDomain(String domain) { this.domain = domain; }
-    
+
     public String getSystem() { return system; }
     public void setSystem(String system) { this.system = system; }
-    
-    public String getParameter() { return parameter; }
-    public void setParameter(String parameter) { this.parameter = parameter; }
-    
-    public String getBaselineValue() { return baselineValue; }
-    public void setBaselineValue(String baselineValue) { this.baselineValue = baselineValue; }
-    
+
     public String getEnvironment() { return environment; }
     public void setEnvironment(String environment) { this.environment = environment; }
-    
+
     public String getSeverityIfDrifted() { return severityIfDrifted; }
     public void setSeverityIfDrifted(String severityIfDrifted) { this.severityIfDrifted = severityIfDrifted; }
-    
+
     public List<ComplianceFrameworkNode> getComplianceMappings() { return complianceMappings; }
     public void setComplianceMappings(List<ComplianceFrameworkNode> complianceMappings) { this.complianceMappings = complianceMappings; }
 }
