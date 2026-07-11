@@ -6,6 +6,9 @@ import {
   BarChart2, CheckCircle2, AlertCircle, User, FileUp, FolderGit2, Activity, Key, ShieldAlert,
   FlaskConical, ChevronDown, ChevronUp, Send, FileText, ArrowLeft, RefreshCw, BookOpen, Shield, Clock
 } from 'lucide-react';
+import { ReactFlow, Controls, Background } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import dagre from 'dagre';
 
 const NAV = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
@@ -433,6 +436,115 @@ function ProjectDrillDown({ project, onBack }) {
                       {selectedInc.remediationSteps || 'No remediation steps.'}
                     </div>
                   </div>
+                  {/* Visual Attack Path Graph */}
+                  {selectedInc.graphData && selectedInc.graphData !== "{}" && (
+                    <div style={{ marginTop: '1rem' }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.85rem', marginBottom: 6, color: 'var(--cyan)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Activity size={14} /> Visual Attack Path
+                      </div>
+                      <div className="g-panel" style={{ height: 350, position: 'relative', overflow: 'hidden', padding: 0 }}>
+                        {(() => {
+                          try {
+                            const gd = JSON.parse(selectedInc.graphData);
+                            if (gd.nodes && gd.nodes.length > 0) {
+                              // Sort nodes chronologically
+                              const sortedNodes = [...gd.nodes].sort((a, b) => 
+                                new Date(a.data.timestamp).getTime() - new Date(b.data.timestamp).getTime()
+                              );
+
+                              // Create a map to find node index quickly for edges
+                              const nodeIndexMap = {};
+                              
+                              let initialNodes = sortedNodes.map((n, i) => {
+                                nodeIndexMap[n.id] = i;
+                                return {
+                                  id: n.id,
+                                  position: { x: 0, y: 0 },
+                                  data: { 
+                                    label: (
+                                      <div style={{ textAlign: 'left', padding: '2px' }}>
+                                        <div style={{ fontSize: '9px', fontWeight: 800, color: 'var(--text-3)', marginBottom: 2, textTransform: 'uppercase' }}>
+                                          Step {i + 1}
+                                        </div>
+                                        <div style={{ fontSize: '9px', fontWeight: 'bold', color: SEV_COLOR[n.data.severity] || '#666' }}>
+                                          {n.data.severity} - {n.data.domain}
+                                        </div>
+                                        <div style={{ fontSize: '11px', fontWeight: 'bold', margin: '3px 0', lineHeight: 1.2 }}>
+                                          {n.data.parameter}
+                                        </div>
+                                        <div style={{ fontSize: '9px', background: 'rgba(0,0,0,0.05)', padding: '2px 4px', borderRadius: '4px', display: 'inline-block' }}>
+                                          Actor: <b>{n.data.changed_by}</b>
+                                        </div>
+                                      </div>
+                                    )
+                                  },
+                                  style: { 
+                                    border: `2px solid ${SEV_COLOR[n.data.severity] || '#ccc'}`,
+                                    borderRadius: '6px',
+                                    background: '#fff',
+                                    width: 150,
+                                    padding: '6px'
+                                  }
+                                };
+                              });
+
+                              let edges = gd.edges.map((e, i) => {
+                                // Ensure arrow points chronologically
+                                const sourceIdx = nodeIndexMap[e.source] ?? 0;
+                                const targetIdx = nodeIndexMap[e.target] ?? 0;
+                                const isReversed = sourceIdx > targetIdx;
+                                
+                                return {
+                                  id: `e-${e.source}-${e.target}`,
+                                  source: isReversed ? e.target : e.source,
+                                  target: isReversed ? e.source : e.target,
+                                  animated: true,
+                                  style: { stroke: '#0891b2', strokeWidth: 2 },
+                                  markerEnd: { type: 'arrowclosed', color: '#0891b2' }
+                                };
+                              });
+
+                              // Dagre Layout Algorithm
+                              const dagreGraph = new dagre.graphlib.Graph();
+                              dagreGraph.setDefaultEdgeLabel(() => ({}));
+                              dagreGraph.setGraph({ rankdir: 'LR', nodesep: 50, ranksep: 80 });
+
+                              initialNodes.forEach((node) => {
+                                dagreGraph.setNode(node.id, { width: 150, height: 80 });
+                              });
+
+                              edges.forEach((edge) => {
+                                dagreGraph.setEdge(edge.source, edge.target);
+                              });
+
+                              dagre.layout(dagreGraph);
+
+                              const nodes = initialNodes.map((node) => {
+                                const nodeWithPosition = dagreGraph.node(node.id);
+                                return {
+                                  ...node,
+                                  position: {
+                                    x: nodeWithPosition.x - 75,
+                                    y: nodeWithPosition.y - 40,
+                                  },
+                                };
+                              });
+
+                              return (
+                                <ReactFlow nodes={nodes} edges={edges} fitView>
+                                  <Background color="#ccc" gap={16} />
+                                  <Controls />
+                                </ReactFlow>
+                              );
+                            }
+                          } catch (e) {
+                            return <div style={{ padding: '1rem' }}>Failed to parse graph data.</div>;
+                          }
+                          return <div style={{ padding: '1rem' }}>No graph data available.</div>;
+                        })()}
+                      </div>
+                    </div>
+                  )}
                   {/* Status change */}
                   <div style={{ display: 'flex', gap: '0.5rem', paddingTop: '0.5rem', borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 600, alignSelf: 'center' }}>Mark as:</span>

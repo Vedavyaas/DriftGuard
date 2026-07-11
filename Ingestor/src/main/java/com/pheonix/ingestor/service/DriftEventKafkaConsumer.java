@@ -139,7 +139,7 @@ public class DriftEventKafkaConsumer {
             actor, nvl(event.getDomain(), "?"), mitre
         );
 
-        return saveIncident(projectHash, r.getSeverity(), description, remediation);
+        return saveIncident(projectHash, r.getSeverity(), description, remediation, "{}");
     }
 
     private String saveCompoundIncident(String projectHash, CompoundIncidentDTO c, int eventCount) {
@@ -154,14 +154,23 @@ public class DriftEventKafkaConsumer {
             "3. Compliance violations: %s.\n4. Escalate to security team.\n5. Revalidate baselines.",
             domains, violations
         );
-        return saveIncident(projectHash, c.getMaxSeverity(), description, remediation);
+        String graphDataStr = "{}";
+        try {
+            if (c.getGraphData() != null) {
+                graphDataStr = objectMapper.writeValueAsString(c.getGraphData());
+            }
+        } catch (Exception e) {
+            System.err.println("[Consumer] Failed to serialize graph data: " + e.getMessage());
+        }
+
+        return saveIncident(projectHash, c.getMaxSeverity(), description, remediation, graphDataStr);
     }
 
-    private String saveIncident(String projectHash, String severityStr, String description, String remediation) {
+    private String saveIncident(String projectHash, String severityStr, String description, String remediation, String graphData) {
         ProjectSeverity severity = ProjectSeverity.MEDIUM;
         try { severity = ProjectSeverity.valueOf(severityStr.toUpperCase()); } catch (Exception ignored) {}
         String id = UUID.randomUUID().toString();
-        incidentRepo.save(new ThreatIncident(id, projectHash, severity, ProjectStatus.UNREAD, description, remediation, "{}"));
+        incidentRepo.save(new ThreatIncident(id, projectHash, severity, ProjectStatus.UNREAD, description, remediation, graphData));
         return id;
     }
 

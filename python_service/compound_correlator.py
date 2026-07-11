@@ -38,6 +38,7 @@ class CompoundIncident:
     time_span_minutes: float
     remediation_steps: List[str]
     analyst_narrative: str
+    graph_data: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
         return {
@@ -54,6 +55,7 @@ class CompoundIncident:
             "remediation_steps": self.remediation_steps,
             "analyst_narrative": self.analyst_narrative,
             "event_count": len(self.events),
+            "graph_data": self.graph_data,
         }
 
 SEVERITY_ORDER = ["INFO", "LOW", "MEDIUM", "HIGH", "CRITICAL"]
@@ -108,7 +110,20 @@ def correlate(analyzed_events: List[Dict[str, Any]], original_events: List[Dict[
 
     incidents: List[CompoundIncident] = []
     for idx, component in enumerate(nx.connected_components(G)):
-        component_events = [G.nodes[eid]['data'] for eid in component]
+        subgraph = G.subgraph(component)
+        component_events = [subgraph.nodes[eid]['data'] for eid in subgraph.nodes]
+        
+        # Serialize subgraph for frontend React Flow rendering
+        graph_data = {
+            "nodes": [
+                {"id": node_id, "data": subgraph.nodes[node_id]['data']} 
+                for node_id in subgraph.nodes
+            ],
+            "edges": [
+                {"source": u, "target": v} 
+                for u, v in subgraph.edges
+            ]
+        }
 
         domains = list({e.get('domain', 'unknown') for e in component_events})
         actors = list({e.get('changed_by', 'unknown') for e in component_events})
@@ -160,6 +175,7 @@ def correlate(analyzed_events: List[Dict[str, Any]], original_events: List[Dict[
             time_span_minutes=span_mins,
             remediation_steps=remediation_steps,
             analyst_narrative=narrative,
+            graph_data=graph_data,
         ))
 
     incidents.sort(key=lambda inc: inc.total_risk_score, reverse=True)
