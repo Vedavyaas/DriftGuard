@@ -32,7 +32,7 @@ public class SimpleMailSender {
 
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
-        simpleMailMessage.setFrom("noreply@driftguard.com");
+        simpleMailMessage.setFrom("testingxyz123456@gmail.com");
         simpleMailMessage.setTo(emailId);
         simpleMailMessage.setSubject("DriftGuard Alert: Critical Infrastructure Drift Detected!");
         simpleMailMessage.setText("URGENT: " + messageInfo[1]);

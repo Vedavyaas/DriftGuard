@@ -226,3 +226,13 @@ export const ingestFile = async (file, projectHash) => {
     if (!response.ok) throw new Error('File injection failed');
     return response.json();
 };
+
+export const queryMlEngine = async (query) => {
+    const response = await fetch(`http://localhost:9003/query`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query })
+    });
+    if (!response.ok) throw new Error('ML Query failed');
+    return response.json();
+};

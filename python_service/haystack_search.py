@@ -87,7 +87,7 @@ def query_events(query_text: str) -> Dict[str, Any]:
     pipeline = Pipeline()
     pipeline.add_component("prompt_builder", PromptBuilder(template=template))
     pipeline.add_component("llm", generator)
-    pipeline.link("prompt_builder", "llm")
+    pipeline.connect("prompt_builder", "llm")
     
     results = pipeline.run({
         "prompt_builder": {

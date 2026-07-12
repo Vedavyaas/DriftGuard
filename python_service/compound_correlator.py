@@ -181,6 +181,7 @@ def correlate(analyzed_events: List[Dict[str, Any]], original_events: List[Dict[
             time_span_minutes=span_mins,
             remediation_steps=remediation_steps,
             analyst_narrative=narrative,
+            graph_data=graph_data,
         ))
 
     incidents.sort(key=lambda inc: inc.total_risk_score, reverse=True)

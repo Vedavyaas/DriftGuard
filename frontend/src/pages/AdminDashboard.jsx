@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import {
   getSelfInfo, getProjectManagersInfo, createProjectManager,
-  changeProjectManagerValidity, changeDetails, getAdminManagerStats
+  changeProjectManagerValidity, changeDetails, getAdminManagerStats,
+  queryMlEngine
 } from '../services/api';
 import {
   ShieldCheck, Users, UserPlus, Settings, LogOut,
@@ -110,10 +112,27 @@ function ProjectHealthList({ projectsHealth }) {
 
 function Overview({ self }) {
   const [stats, setStats] = useState(null);
+  const [mlQuery, setMlQuery] = useState('');
+  const [mlResult, setMlResult] = useState(null);
+  const [mlLoading, setMlLoading] = useState(false);
 
   useEffect(() => {
     getAdminManagerStats().then(setStats).catch(() => {});
   }, []);
+
+  const handleMlQuery = async () => {
+    if (!mlQuery.trim()) return;
+    setMlLoading(true);
+    setMlResult(null);
+    try {
+      const res = await queryMlEngine(mlQuery);
+      setMlResult(res);
+    } catch (e) {
+      setMlResult({ error: e.message });
+    } finally {
+      setMlLoading(false);
+    }
+  };
 
   if (!self) return <div style={{ color: 'var(--text-3)', padding: '2rem' }}>Loading…</div>;
 
@@ -179,6 +198,54 @@ function Overview({ self }) {
       {stats && stats.projects_health && (
         <ProjectHealthList projectsHealth={stats.projects_health} />
       )}
+
+      {/* ML Query Engine */}
+      <div className="g-card" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--indigo)', fontWeight: 800 }}>
+          <Search size={18} />
+          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>ML Intelligence Query</h3>
+        </div>
+        <p style={{ color: 'var(--text-2)', fontSize: '0.9rem', margin: 0 }}>
+          Query the AI agent directly using natural language. The RAG system will analyze historical incidents and system drift events.
+        </p>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <input 
+            type="text" 
+            className="inp" 
+            style={{ flex: 1 }}
+            placeholder="e.g. Which manager has the most critical incidents?" 
+            value={mlQuery}
+            onChange={(e) => setMlQuery(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleMlQuery()}
+          />
+          <button 
+            className="btn btn-primary" 
+            onClick={handleMlQuery} 
+            disabled={mlLoading || !mlQuery.trim()}
+          >
+            {mlLoading ? 'Querying...' : 'Ask AI'}
+          </button>
+        </div>
+        {mlResult && (
+          <div style={{ 
+            marginTop: '1rem', 
+            padding: '1rem', 
+            background: 'var(--surface-3)', 
+            borderRadius: 8,
+            fontSize: '0.9rem',
+            color: mlResult.error ? '#ef4444' : 'var(--text-1)',
+            overflowX: 'auto',
+          }}>
+            {mlResult.error ? (
+              `Error: ${mlResult.error}`
+            ) : (
+              <ReactMarkdown>
+                {mlResult.answer || JSON.stringify(mlResult, null, 2)}
+              </ReactMarkdown>
+            )}
+          </div>
+        )}
+      </div>
 
     </div>
   );

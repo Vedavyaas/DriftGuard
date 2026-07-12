@@ -161,7 +161,7 @@ public class ProjectReportController {
             "projects_health", projectsHealth
         ));
     }
-    
+
     @PreAuthorize("hasAuthority('SCOPE_ROLE_PROJECTMANAGER')")
     @PutMapping("/incident/{id}/status")
     public ResponseEntity<String> updateStatus(
