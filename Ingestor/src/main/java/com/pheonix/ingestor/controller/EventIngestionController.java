@@ -33,44 +33,55 @@ public class EventIngestionController {
     }
 
     @PostMapping("/ingest")
-    public ResponseEntity<?> ingestEvents(@RequestBody List<DriftEventDTO> events) {
-        if (events == null || events.isEmpty()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "No events provided"));
+    public ResponseEntity<?> ingestEvents(@RequestBody List<Object> payloads) {
+        if (payloads == null || payloads.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No payloads provided"));
         }
 
         int sent = 0;
-        for (DriftEventDTO event : events) {
-            String hash = event.getProjectHash();
-            
-            // If there's no project hash, or project doesn't exist, make it!
-            if (hash == null || hash.isBlank() || projectRepo.findByProjectHash(hash).isEmpty()) {
-                ProjectManagerEntity newProject = new ProjectManagerEntity(
-                        "Auto-Generated Manager", 
-                        "Auto-Project-" + UUID.randomUUID().toString().substring(0, 5), 
-                        "{}".getBytes()
-                );
-                newProject.setStatus(Status.NOT_STARTED);
-                projectRepo.save(newProject);
-
-                // Generate hash if it was null/blank
-                if (hash == null || hash.isBlank()) {
-                    hash = HashUtil.sha256(newProject.getId() + newProject.getProjectName() + newProject.getManagerName());
+        for (Object payload : payloads) {
+            if (payload instanceof String) {
+                // It's a raw NLP text string. Send directly to Kafka!
+                String text = (String) payload;
+                if (!text.isBlank()) {
+                    kafkaTemplate.send("drift-events", text);
+                    sent++;
                 }
-                
-                newProject.setProjectHash(hash);
-                projectRepo.save(newProject);
-                
-                // Assign the newly ensured hash back to the event
-                event.setProjectHash(hash);
-                System.out.println("Created new project for hash: " + hash);
-            }
+            } else {
+                // It's a JSON object representing a DriftEventDTO
+                try {
+                    DriftEventDTO event = objectMapper.convertValue(payload, DriftEventDTO.class);
+                    String hash = event.getProjectHash();
+                    
+                    // If there's no project hash, or project doesn't exist, make it!
+                    if (hash == null || hash.isBlank() || projectRepo.findByProjectHash(hash).isEmpty()) {
+                        ProjectManagerEntity newProject = new ProjectManagerEntity(
+                                "Auto-Generated Manager", 
+                                "Auto-Project-" + UUID.randomUUID().toString().substring(0, 5), 
+                                "{}".getBytes()
+                        );
+                        newProject.setStatus(Status.NOT_STARTED);
+                        projectRepo.save(newProject);
 
-            try {
-                String eventJson = objectMapper.writeValueAsString(event);
-                kafkaTemplate.send("drift-events", eventJson);
-                sent++;
-            } catch (JsonProcessingException e) {
-                System.err.println("Failed to serialize event: " + e.getMessage());
+                        // Generate hash if it was null/blank
+                        if (hash == null || hash.isBlank()) {
+                            hash = HashUtil.sha256(newProject.getId() + newProject.getProjectName() + newProject.getManagerName());
+                        }
+                        
+                        newProject.setProjectHash(hash);
+                        projectRepo.save(newProject);
+                        
+                        // Assign the newly ensured hash back to the event
+                        event.setProjectHash(hash);
+                        System.out.println("Created new project for hash: " + hash);
+                    }
+
+                    String eventJson = objectMapper.writeValueAsString(event);
+                    kafkaTemplate.send("drift-events", eventJson);
+                    sent++;
+                } catch (Exception e) {
+                    System.err.println("Failed to serialize event: " + e.getMessage());
+                }
             }
         }
 
@@ -90,16 +101,19 @@ public class EventIngestionController {
             return ResponseEntity.badRequest().body(Map.of("error", "No file provided"));
         }
         try {
-            List<DriftEventDTO> events = objectMapper.readValue(
+            List<Object> payloads = objectMapper.readValue(
                     file.getInputStream(),
-                    new TypeReference<List<DriftEventDTO>>() {}
+                    new TypeReference<List<Object>>() {}
             );
-            // Stamp projectHash onto every event if provided
+            // Stamp projectHash onto every event if provided and if it's a Map (JSON object)
             if (projectHash != null && !projectHash.isBlank()) {
-                events.forEach(e -> e.setProjectHash(projectHash));
+                for (Object payload : payloads) {
+                    if (payload instanceof Map) {
+                        ((Map<String, Object>) payload).put("projectHash", projectHash);
+                    }
+                }
             }
-            // Reuse the same publish logic
-            return ingestEvents(events);
+            return ingestEvents(payloads);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Failed to parse JSON file: " + e.getMessage()));
         }

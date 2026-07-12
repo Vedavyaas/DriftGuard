@@ -5,7 +5,7 @@ import {
   XCircle, Clock, ShieldAlert, FileText, Settings, Key, BookOpen, ChevronRight, EyeOff, Eye, RefreshCw, FolderGit2, ArrowLeft, Shield,
   LayoutDashboard, PlusCircle, User, AlertCircle, FileUp, FlaskConical, BarChart2, ChevronUp, ChevronDown, Send
 } from 'lucide-react';
-import { sampleCriticalSingle, sampleCompoundLowEvents, sampleInsiderThreat, sampleIndependentEvents } from '../utils/samples';
+import { sampleCriticalSingle, sampleCompoundLowEvents, sampleInsiderThreat, sampleIndependentEvents, sampleNlpText } from '../utils/samples';
 import {
   getSelfInfo, changeDetails, createProject, getProjects,
   changeProjectStatus, changeProjectBaseline, getIncidents,
@@ -1072,20 +1072,27 @@ function FileEventInjector() {
     if (!selHash) { setStatus({ ok: false, text: 'Select a project.' }); return; }
     setBusy(true); setStatus(null);
     try {
-      let events = [];
-      if (sampleType === 'critical') events = sampleCriticalSingle;
-      else if (sampleType === 'compound') events = sampleCompoundLowEvents;
-      else if (sampleType === 'insider') events = sampleInsiderThreat;
-      else if (sampleType === 'independent') events = sampleIndependentEvents;
-
-      // Stamp the selected project hash onto every event
-      const stamped = events.map(e => ({ ...e, project_hash: selHash, timestamp: new Date().toISOString() }));
-      
-      // Inject events individually as requested
       let sentCount = 0;
-      for (const e of stamped) {
-        const res = await injectTestEvent([e]);
+      
+      if (sampleType === 'nlp') {
+        const nlpText = sampleNlpText.replace('{HASH}', selHash);
+        const res = await injectTestEvent([nlpText]);
         sentCount += res.events_sent || 1;
+      } else {
+        let events = [];
+        if (sampleType === 'critical') events = sampleCriticalSingle;
+        else if (sampleType === 'compound') events = sampleCompoundLowEvents;
+        else if (sampleType === 'insider') events = sampleInsiderThreat;
+        else if (sampleType === 'independent') events = sampleIndependentEvents;
+
+        // Stamp the selected project hash onto every event
+        const stamped = events.map(e => ({ ...e, project_hash: selHash, timestamp: new Date().toISOString() }));
+        
+        // Inject events individually as requested
+        for (const e of stamped) {
+          const res = await injectTestEvent([e]);
+          sentCount += res.events_sent || 1;
+        }
       }
       
       setStatus({ ok: true, text: `✅ Injected ${sentCount} event(s).` });
@@ -1142,6 +1149,7 @@ function FileEventInjector() {
             <option value="compound">5 LOW Events (Compound Critical)</option>
             <option value="insider">5 MIXED Events (Insider Threat)</option>
             <option value="independent">5 INDEPENDENT Events</option>
+            <option value="nlp">1 NLP Natural Language String</option>
           </select>
 
           <button onClick={handleInject} disabled={busy || !selHash} style={{

@@ -161,8 +161,7 @@ public class ProjectReportController {
             "projects_health", projectsHealth
         ));
     }
-
-    /** Update incident status (UNREAD → RESOLVED, etc.). */
+    
     @PreAuthorize("hasAuthority('SCOPE_ROLE_PROJECTMANAGER')")
     @PutMapping("/incident/{id}/status")
     public ResponseEntity<String> updateStatus(

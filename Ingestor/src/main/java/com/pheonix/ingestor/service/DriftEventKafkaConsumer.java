@@ -33,6 +33,7 @@ public class DriftEventKafkaConsumer {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final ProjectHealthService projectHealthService;
+    private final OpenNlpService openNlpService;
 
     public DriftEventKafkaConsumer(ProjectManagerRepository projectRepo,
                                    ThreatIncidentRepository incidentRepo,
@@ -40,7 +41,8 @@ public class DriftEventKafkaConsumer {
                                    EventBufferService bufferService,
                                    MLIntelligenceClient mlClient,
                                    KafkaTemplate<String, String> kafkaTemplate,
-                                   ProjectHealthService projectHealthService) {
+                                   ProjectHealthService projectHealthService,
+                                   OpenNlpService openNlpService) {
         this.projectRepo = projectRepo;
         this.incidentRepo = incidentRepo;
         this.rawEventRepo = rawEventRepo;
@@ -49,13 +51,27 @@ public class DriftEventKafkaConsumer {
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = new ObjectMapper();
         this.projectHealthService = projectHealthService;
+        this.openNlpService = openNlpService;
     }
 
     @Transactional
     @KafkaListener(topics = "drift-events", groupId = "projectGroup")
     public void consumeEvent(String message) {
         try {
-            DriftEventDTO event = objectMapper.readValue(message, DriftEventDTO.class);
+            String trimmed = message.trim();
+            DriftEventDTO event;
+            if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+                try {
+                    event = objectMapper.readValue(trimmed, DriftEventDTO.class);
+                } catch (Exception e) {
+                    System.out.println("[Consumer] Failed JSON parse, falling back to NLP: " + e.getMessage());
+                    event = openNlpService.parseNaturalLanguage(trimmed);
+                }
+            } else {
+                System.out.println("[Consumer] Detected natural language text. Parsing with OpenNLP...");
+                event = openNlpService.parseNaturalLanguage(trimmed);
+            }
+            
             String projectHash = event.getProjectHash();
 
             // ── 1. Resolve project ──────────────────────────────────────────────

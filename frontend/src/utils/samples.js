@@ -265,3 +265,5 @@ export const sampleIndependentEvents = [
     "maintenance_window": false
   }
 ];
+
+export const sampleNlpText = "2026-07-12T10:14:13Z [CRITICAL_ALERT] [SRC_IP=192.168.1.105] [ACTOR=unauthorized_bot] [DOMAIN=AWS] Integrity violation detected for project_hash {HASH}. The rogue bot successfully executed commands to DROP critical Postgres database tables and OPEN ingress port 22 on the production perimeter firewall. Action=Blocked:FALSE. Immediate containment required.";
