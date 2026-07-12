@@ -9,11 +9,14 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
 import sys
+from haystack import Pipeline
+from haystack.components.builders import PromptBuilder
 
 sys.path.insert(0, os.path.dirname(__file__))
 
 from drift_detector import get_detector
 from compound_correlator import correlate, CompoundIncident
+from haystack_search import index_event, query_events, get_generator
 
 _SVC_DIR = os.path.dirname(__file__)
 _ROOT = os.path.join(_SVC_DIR, '..')
@@ -55,6 +58,18 @@ class BatchRequest(BaseModel):
 class SingleEvent(BaseModel):
     event: DriftEvent
 
+class QueryRequest(BaseModel):
+    query: str
+
+class RemediationRequest(BaseModel):
+    event_id: str
+    control_id: str
+    parameter: str
+    old_value: str
+    new_value: str
+    domain: str
+    system: str
+
 def _load_events_from_csv() -> List[Dict]:
     events = []
     try:
@@ -81,8 +96,45 @@ def health():
 @app.post("/analyze/event")
 def analyze_single(body: SingleEvent):
     detector = get_detector()
-    result = detector.predict(body.event.model_dump())
+    event_dict = body.event.model_dump()
+    result = detector.predict(event_dict)
+    index_event(event_dict, result)
     return result
+
+@app.post("/query")
+def query_rag(body: QueryRequest):
+    return query_events(body.query)
+
+@app.post("/remediate")
+def get_remediation_steps(body: RemediationRequest):
+    generator = get_generator()
+    if not generator:
+        return {"remediation": f"1. Revert parameter {body.parameter} on system {body.system} from {body.new_value} back to baseline {body.old_value}."}
+        
+    prompt = f"""
+    You are a Security Analyst. Recommend specific remediation steps for this MITRE ATT&CK drift event:
+    System: {body.system}
+    Domain: {body.domain}
+    Control ID: {body.control_id}
+    Parameter: {body.parameter}
+    Post-Drift State: Changed from {body.old_value} to {body.new_value}
+
+    Provide exactly 3 bullet points with direct technical action items.
+    """
+    
+    pipeline = Pipeline()
+    template = "{{prompt}}"
+    pipeline.add_component("prompt_builder", PromptBuilder(template=template))
+    pipeline.add_component("llm", generator)
+    pipeline.link("prompt_builder", "llm")
+    
+    results = pipeline.run({
+        "prompt_builder": {
+            "prompt": prompt
+        }
+    })
+    
+    return {"remediation": results["llm"]["replies"][0]}
 
 @app.post("/analyze/batch")
 def analyze_batch(body: BatchRequest):
